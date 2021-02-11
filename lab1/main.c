@@ -1,7 +1,4 @@
-//- add input errors
-//- use matrix pointers
-//- write tester
-//- push it all
+//lab 1.25
 
 #include "matrix.h"
 
