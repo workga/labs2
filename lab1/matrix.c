@@ -12,29 +12,34 @@ Matrix get_matrix() {
 	for(int i = 0; i < matrix.m; i++) {
 		scanf("%d", &(matrix.rows[i].n));
 		matrix.rows[i].ints = (int*)calloc(matrix.rows[i].n, sizeof(int));
+
 		for(int j = 0; j < matrix.rows[i].n; j++) {
 			scanf("%d", &(matrix.rows[i].ints[j]));
 		}
 	}
 
-	return matrix;//it is not a pointer!
+	return matrix;
 }
 
 void delete_matrix(Matrix matrix) {
 	for(int i = 0; i < matrix.m; i++) {
 		free(matrix.rows[i].ints);
 	}
+
 	free(matrix.rows);
 }
 
 void print_matrix(char* message, Matrix matrix) {
 	printf("%s\n", message);
+
 	for(int i = 0; i < matrix.m; i++) {
 		for(int j = 0; j < matrix.rows[i].n; j++) {
-			printf("%d\t", matrix.rows[i].ints[j]);
+			printf("%5.d\t", matrix.rows[i].ints[j]);
 		}
+
 		printf("\n");
 	}
+
 	printf("\n");
 }
 
@@ -42,12 +47,14 @@ void print_matrix(char* message, Matrix matrix) {
 int find_first_min(Row row) {
 	int start = 0;
 	int min = row.ints[0];
+
 	for(int j = 1; j < row.n; j++) {
 		if(row.ints[j] < min) {
 		    min = row.ints[j];
 			start = j;
 		}
 	}
+
 	return start;
 }
 
@@ -66,5 +73,6 @@ Matrix process_matrix(Matrix old_matrix) {
 			new_matrix.rows[i].ints[j] = old_matrix.rows[i].ints[j + start];
 		}
 	}
+
 	return new_matrix;
 }

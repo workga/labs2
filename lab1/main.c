@@ -1,3 +1,8 @@
+//- add input errors
+//- use matrix pointers
+//- write tester
+//- push it all
+
 #include "matrix.h"
 
 int main(int argc, const char** argv) {
@@ -10,5 +15,5 @@ int main(int argc, const char** argv) {
 	delete_matrix(old_matrix);
 	delete_matrix(new_matrix);
 
-    return 0;
+	return 0;
 }
