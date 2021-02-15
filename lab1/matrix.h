@@ -11,7 +11,7 @@ typedef struct Matrix {
 	Row* rows;
 } Matrix;
 
-Matrix get_matrix();
+int get_matrix(Matrix* p_matrix);
 void delete_matrix(Matrix matrix);
 void print_matrix(char* message, Matrix matrix);
 int find_first_min(Row row);
