@@ -16,7 +16,7 @@ int get_int(const char* format, int* address) {
 }
 
 int get_matrix(Matrix* p_matrix) {
-	printf("Please, enter the number of rows:\n");
+	printf("Please, enter the number of rows: ");
 	do {
 		if (get_int("%d", &(p_matrix->m))) {
 			return 1;
