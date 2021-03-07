@@ -67,7 +67,7 @@ int stack_push(Stack s, void* data) {
 
 	#else
 
-	vector_push_back(s.cont->list, data);
+	vector_push_back(s.cont->vector, data);
 
 	#endif
 
@@ -83,8 +83,8 @@ int stack_pop(Stack s, void* dest) {
 	#else
 
 	int size = vector_size(s.cont->vector);
-	vector_get(s.cont->vector, size, dest);
-	vector_erase(s.cont->vector, size);
+	vector_get(s.cont->vector, size - 1, dest);
+	vector_remove_back(s.cont->vector);
 
 	#endif
 
@@ -98,8 +98,8 @@ int stack_peek(Stack s, void* dest) {
 
 	#else
 
-	int size = vector_size(s.cont->vector)
-	vector_get(s.cont->vector, size, dest);
+	int size = vector_size(s.cont->vector);
+	vector_get(s.cont->vector, size - 1, dest);
 
 	#endif
 
@@ -112,6 +112,8 @@ int stack_print_int(Stack s) {
 	list_print_int(s.cont->list);
 
 	#else
+
+	vector_print_int(s.cont->vector);
 
 	#endif
 
