@@ -17,6 +17,8 @@ Vector* vector_new(size_t item_size) {
 int vector_delete(Vector *vector) {
 	free(vector->data);
 	free(vector);
+
+	return 0;
 }
 
 int vector_size(Vector *vector) {

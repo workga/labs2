@@ -1,8 +1,12 @@
-#here add vector and list as libraries!!!
-all: list
+all: main.c libstack.a
+	gcc -Wextra -c main.c
+	gcc main.o -L. -lstack -o main
 
-list:
-	gcc -D USE_LIST main.c stack.c list.c vector.c -o main
 
-vector:
-	gcc main.c stack.c list.c vector.c -o main
+list: stack.c list.c
+	gcc -Wextra -D USE_LIST -c stack.c list.c
+	ar -rcs libstack.a stack.o list.o
+
+vector: stack.c vector.c
+	gcc -Wextra -c stack.c vector.c
+	ar -rcs libstack.a stack.o vector.o
