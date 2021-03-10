@@ -4,11 +4,10 @@
 #include <string.h>
 #include "list.h"
 
-List* list_new(size_t item_size) {
+List* list_new() {
     List* list = (List *)calloc(1, sizeof(List));
     list->head = NULL;
     list->tail = NULL;
-    list->item_size = item_size;
     return list;
 }
 
@@ -44,10 +43,11 @@ int list_is_empty(List *list) {
 // 
 // }
 
-int list_push_front(List *list, void *data) {
+int list_push_front(List *list, void *data, size_t size) {
     Item *ptr = (Item*)malloc(sizeof(Item));
-    ptr->data = (void*)malloc(list->item_size);
-    memcpy(ptr->data, data, list->item_size);
+    ptr->data = (void*)malloc(size);
+    ptr->size = size;
+    memcpy(ptr->data, data, size);
 
     if (!list->head) {
         ptr->next = NULL;
@@ -74,9 +74,9 @@ int list_push_front(List *list, void *data) {
 int list_remove_front(List *list) {
     Item *old_head = list->head;
 
-    if (list->head == NULL) {
-        return 1;
-    } else if (list->head == list->tail) {
+    if (list->head == NULL) return 1;
+    
+    if (list->head == list->tail) {
         list->head = NULL;
         list->tail = NULL;
     } else {
@@ -94,27 +94,33 @@ int list_remove_front(List *list) {
 
 
 
-// int list_get_back(List *list, void *dest) {
+// void* list_get_back(List *list) {
 // 
 // }
 
-int list_get_front(List *list, void *dest) {
-    memcpy(dest, list->head->data, list->item_size);
+void* list_get_front(List *list) {
+    if (list->head == NULL) return NULL;
 
-    return 0;
+    void *data = (void*)malloc(list->head->size);
+    memcpy(data, list->head->data, list->head->size);
+
+    return data;
 }
 
-// int list_get(List *list, Item *ptr, void* dest) {
+// void* list_get(List *list, Item *ptr) {
 // 
 // }
 
 
 
-int list_print_int(List *list) {
-    for (Item *ptr = list->head; ptr; ptr = ptr->next) {
-        printf("%d ", *(int*)(ptr->data));
+int list_print(List *list) {
+    Item *ptr = list->head;
+    printf("\"");
+    while(ptr) {
+        printf("%s ", (char*)ptr->data);
+        ptr = ptr->next;
     }
+    printf("\"");
     printf("\n");
-
     return 0;
 }

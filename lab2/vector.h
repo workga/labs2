@@ -1,33 +1,37 @@
 #ifndef __VECTOR_H
 #define __VECTOR_H
 
-#define VECTOR_CAPACITY 4
+#define VECTOR_CAPACITY 6
+
+typedef struct Item {
+    void *data;
+    size_t size;
+} Item;
 
 typedef struct Vector {
-    void *data;
-    size_t item_size;
+    Item *items;
     int size;
     int capacity;
 } Vector;
 
 
-Vector* vector_new(size_t item_size);
+Vector* vector_new();
 int vector_delete(Vector *vector);
 int vector_size(Vector *vector);
 int vector_capacity(Vector *vector);
 
-int vector_push_back(Vector *vector, void *data);
-//int vector_push_front(Vector *vector, void *data);
-//int vector_push(Vector *vector, Item *ptr, void *data);
+int vector_push_back(Vector *vector, void *data, size_t size);
+//int vector_push_front(Vector *vector, void *data, size_t size);
+//int vector_push(Vector *vector, Item *ptr, void *data, size_t size);
 
 int vector_remove_back(Vector *vector);
 //int vector_remove_front(Vector *vector);
 //int vector_remove(Vector *vector, Item *ptr);
 
 int vector_empty(Vector *vector);
-int vector_get(Vector *vector, int index, void *dest);
+void* vector_get(Vector *vector, int index);
 
-int vector_print_int(Vector *vector);
+int vector_print(Vector *vector);
 
 
 #endif

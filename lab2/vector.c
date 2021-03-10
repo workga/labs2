@@ -4,10 +4,9 @@
 #include <string.h>
 #include "vector.h"
 
-Vector* vector_new(size_t item_size) {
+Vector* vector_new() {
 	Vector *vector = (Vector*)malloc(sizeof(Vector));
-	vector->data = (void*)calloc(VECTOR_CAPACITY, item_size);
-	vector->item_size = item_size;
+	vector->items = (Item*)calloc(VECTOR_CAPACITY, sizeof(Item));
 	vector->size = 0;
 	vector->capacity = VECTOR_CAPACITY;
 
@@ -15,7 +14,10 @@ Vector* vector_new(size_t item_size) {
 }
 
 int vector_delete(Vector *vector) {
-	free(vector->data);
+	for (int i = 0; i < vector->size; i++) {
+		free(vector->items[i].data);
+	}
+	free(vector->items);
 	free(vector);
 
 	return 0;
@@ -31,21 +33,25 @@ int vector_capacity(Vector *vector) {
 
 
 
-int vector_push_back(Vector *vector, void *data) {
+int vector_push_back(Vector *vector, void *data, size_t size) {
 	if(vector->size == vector->capacity) return 1;
 
-	void *ptr = vector->data + (vector->size)*(vector->item_size);
-	memcpy(ptr, data, vector->item_size);
+	//???
+	//Item *ptr = vector->items + vector->size*(sizeof(Item));
+	Item *ptr = &(vector->items[vector->size]);
+	ptr->data = (void*)malloc(size);
+	ptr->size = size;
+	memcpy(ptr->data, data, size);
 	vector->size++;
 
 	return 0;
 }
 
-// int vector_push_front(Vector *vector, void *data) {
+// int vector_push_front(Vector *vector, void *data, size_t size) {
 // 
 // }
 
-// int vector_push(Vector *vector, Item *ptr, void *data) {
+// int vector_push(Vector *vector, Item *ptr, void *data, size_t size) {
 // 
 // }
 
@@ -54,6 +60,8 @@ int vector_push_back(Vector *vector, void *data) {
 int vector_remove_back(Vector *vector) {
 	if (vector->size == 0) return 1;
 
+	Item *ptr = &(vector->items[vector->size - 1]);
+	free(ptr->data);
 	vector->size--;
 
 	return 0;
@@ -74,22 +82,24 @@ int vector_empty(Vector *vector) {
 	else return 0;
 }
 
-int vector_get(Vector *vector, int index, void *dest) {
-	if (index > vector->size - 1) return 1;
+void *vector_get(Vector *vector, int index) {
+	if ((index > vector->size - 1) || (index < 0) || (vector->size == 0)) return NULL;
 
-	void *ptr = vector->data + (index)*(vector->item_size);
-	memcpy(dest, ptr, vector->item_size);
+	Item *ptr = &(vector->items[index]);
+    void *data = (void*)malloc(ptr->size);
+	memcpy(data, ptr->data, ptr->size);
 
-	return 0;
+	return data;
 }
 
 
 
-int vector_print_int(Vector *vector) {
-	for (int index = 0; index < vector->size; index++) {
-		void *ptr = vector->data + index*(vector->item_size);
-		printf("%d ", *(int*)ptr);
+int vector_print(Vector *vector) {
+	printf("\"");
+	for (int i = 0; i < vector->size; i++) {
+		printf("%s ", (char*)vector->items[i].data);
 	}
+	printf("\"");
 	printf("\n");
 	return 0;
 }
