@@ -17,7 +17,7 @@ double* step(Stack *stack);
 int main(int argc, const char** argv) {
 	Stack* stack = stack_new();
 	if (fill_stack(stack)) {
-		printf("[INFO] ERROR: STACK FILLED WITH NOT-NULL STATUS");
+		printf("[INFO] ERROR: STACK FILLED WITH NOT-NULL STATUS\n");
 		stack_delete(stack);
 		return 1;
 	}
@@ -46,7 +46,7 @@ int fill_stack(Stack *stack) {
 	int len = 0;
 
 	while((ch = getchar()) != EOF) {
-		if isdigit(ch) {
+		if (isdigit(ch)) {
 			if (len >= MAX_INT_LEN) return 1;
 
 			buf[len] = ch;
@@ -82,14 +82,14 @@ double* step(Stack *stack) {
 
 	double *res = (double*)malloc(sizeof(double));
 
-	if isdigit(op[0]) {
+	if (isdigit(op[0])) {
 		*res = (double)atoi(op);
 		printf("[INFO] OPERATOR IS INTEGER: %f \n", *res);
 
 	} else {
 
-		double* op_right = step(stack); //right order, because the stack is reversed
-		double* op_left = step(stack);
+		double* op_left = step(stack); //right order, because the stack is reversed
+		double* op_right = step(stack);
 
 		if (!op_right || !op_left) {
 			printf("[INFO] WRONG INPUT");

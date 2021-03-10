@@ -36,9 +36,7 @@ int vector_capacity(Vector *vector) {
 int vector_push_back(Vector *vector, void *data, size_t size) {
 	if(vector->size == vector->capacity) return 1;
 
-	//???
-	//Item *ptr = vector->items + vector->size*(sizeof(Item));
-	Item *ptr = &(vector->items[vector->size]);
+	Item *ptr = vector->items + vector->size;
 	ptr->data = (void*)malloc(size);
 	ptr->size = size;
 	memcpy(ptr->data, data, size);
@@ -60,7 +58,7 @@ int vector_push_back(Vector *vector, void *data, size_t size) {
 int vector_remove_back(Vector *vector) {
 	if (vector->size == 0) return 1;
 
-	Item *ptr = &(vector->items[vector->size - 1]);
+	Item *ptr = vector->items + (vector->size - 1);
 	free(ptr->data);
 	vector->size--;
 
@@ -85,7 +83,7 @@ int vector_empty(Vector *vector) {
 void *vector_get(Vector *vector, int index) {
 	if ((index > vector->size - 1) || (index < 0) || (vector->size == 0)) return NULL;
 
-	Item *ptr = &(vector->items[index]);
+	Item *ptr = vector->items + index;
     void *data = (void*)malloc(ptr->size);
 	memcpy(data, ptr->data, ptr->size);
 
