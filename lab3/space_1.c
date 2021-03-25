@@ -26,8 +26,10 @@ Space_1* space_1_new(int max_size) {
 
 
 void space_1_delete(Space_1 *space) {
-    if (VERBOSE) printf("[INFO] space_1_delete\n");
+	if (VERBOSE) printf("[INFO] space_1_delete\n");
 
+	if (!space) return;
+	
 	free(space->items);
 	free(space);
 }
@@ -36,13 +38,13 @@ void space_1_delete(Space_1 *space) {
 int space_1_insert(Space_1 *space, unsigned int key, unsigned int parent_key, Data* data) {
 	if (VERBOSE) printf("[INFO] space_1_insert\n");
 
-	if (space_1_find(space, key) >= 0) return 1;
-	if ((parent_key != 0) && (space_1_find(space, parent_key) < 0)) return 2;
+	if (space_1_find(space, key)) return 1;
+	if ((parent_key != 0) && !space_1_find(space, parent_key)) return 2;
 
 
 	if (space->size >= space->max_size) {
 		space_1_collect_garbage(space);
-		if (space->size >= space->max_size) return 2;
+		if (space->size >= space->max_size) return 3;
 	}
 
 	space->items[space->size].busy = 1;
@@ -57,29 +59,31 @@ int space_1_insert(Space_1 *space, unsigned int key, unsigned int parent_key, Da
 int space_1_remove(Space_1 *space, unsigned int key, int recurr) {
 	if (VERBOSE) printf("[INFO] space_1_remove\n");
 
-	int index = space_1_find(space, key);
+	int index = space_1_find_index(space, key);
 	if (index < 0) return 1;
 
 	space->items[index].busy = 0;
 
-	if (recurr) {
-		for(int i = 0; i < space->size; i++) {
-			if (space->items[i].parent_key == key) {
-				// [FEATURE] add space_1_remove_by_index(...)
-				space_1_remove(space, space->items[i].key, 1);
-			}
+	for(int i = 0; i < space->size; i++) {
+		if (space->items[i].parent_key == key) {
+			if (recurr) space_1_remove(space, space->items[i].key, 1);
+			else space->items[i].parent_key = 0;
+			// maybe dont do it? 
+			// (maybe change it also in Data?)
 		}
 	}
+
 
 	return 0;
 }
 
 
-int space_1_find(Space_1 *space, unsigned int key) {
-    if (VERBOSE) printf("[INFO] space_1_find\n");
+int space_1_find_index(Space_1 *space, unsigned int key) {
+    if (VERBOSE) printf("[INFO] space_1_find_index\n");
 
+    Item_1 item;
 	for(int i = 0; i < space->size; i++) {
-		Item_1 item = space->items[i];
+		item = space->items[i];
 		if (item.key == key) {
 			if (item.busy) return i;
 			else return -1;
@@ -89,13 +93,19 @@ int space_1_find(Space_1 *space, unsigned int key) {
 	return -1;
 }
 
+Data* space_1_find(Space_1 *space, unsigned int key) {
+    if (VERBOSE) printf("[INFO] space_1_find\n");
 
-Data* space_1_get(Space_1 *space, int index) {
-    if (VERBOSE) printf("[INFO] space_1_get\n");
+    Item_1 item;
+	for(int i = 0; i < space->size; i++) {
+		item = space->items[i];
+		if (item.key == key) {
+			if (item.busy) return item.data;
+			else return NULL;
+		}
+	}
 
-	if ((index < 0) || (index >= space->size)) return NULL;
-
-	return space->items[index].data;
+	return NULL;
 }
 
 
