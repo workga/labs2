@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
+
 #include "space_2.h"
+#include "data.h"
 
 
 Space_2* space_2_new(int max_size, int max_key_len) {
@@ -31,6 +33,10 @@ Space_2* space_2_new(int max_size, int max_key_len) {
 
 
 void node_2_delete(Node_2 *node) {
+	free(node->data->key_2);
+	node->data->key_2 = NULL;
+	node->data->release = 0;
+
 	free(node->key);
 	free(node);
 }
@@ -66,7 +72,7 @@ void space_2_delete(Space_2 *space) {
 int space_2_hash(Space_2 *space, char *key) {
 	if (VERBOSE) printf("[INFO] space_2_hash\n");
 	int h = 0;
-	for (int i = 0; i < strlen(key); i++) {
+	for (int i = 0; i < (int)strlen(key); i++) {
 		h = h^(int)key[i];
 	}
 	h %= space->max_size;
@@ -77,7 +83,7 @@ int space_2_hash(Space_2 *space, char *key) {
 int space_2_check_key(Space_2 *space, char *key) {
 	if (VERBOSE) printf("[INFO] space_2_check_key\n");
 
-	if (strlen(key) > space->max_key_len) return 1;
+	if ((int)strlen(key) > space->max_key_len) return 1;
 	else return 0;
 }
 
@@ -90,21 +96,31 @@ int space_2_insert(Space_2 *space, char *key, Data* data) {
 
 
 	Node_2 *node = (Node_2*)calloc(1, sizeof(Node_2));
-	char *key_copy = (char*) calloc(strlen(key) + 1, sizeof(key));
-	if (!node || !key_copy) {
-		free(key_copy);
+	char *node_key = (char*)calloc(strlen(key) + 1, sizeof(key));
+	char *data_key = (char*)calloc(strlen(key) + 1, sizeof(char));
+
+	if (!node || !node_key || !data_key) {
+		free(data_key);
+		free(node_key);
 		free(node);
 		return 2;
 	}
-    strcpy(key_copy, key);
+    strcpy(node_key, key);
+	strcpy(data_key, key);
 
 	space->items[index].release++;
 
-	node->key = key_copy;
+	data->release = space->items[index].release;
+	data->key_2 = data_key;
+
 	node->release = space->items[index].release;
+	node->key = node_key;
 	node->data = data;
+
+
 	node->next = space->items[index].head;
 	space->items[index].head = node;
+
 
 	return 0;
 }
@@ -178,20 +194,21 @@ int space_2_remove(Space_2 *space, char *key, int release) {
 
 void space_2_print(Space_2 *space) {
 	printf("\n");
-    printf("---------/ SPACE_2 /------------\n");
+    printf("|^^^^^^^^^^^/ SPACE_2 /^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|\n");
     printf("hash\tlast\tlist\n");
 	for (int i = 0; i < space->max_size; i++) {
 		Item_2 item = space->items[i];
 
-		printf("%d\t%d\t|", i, item.release);
+		printf("%d\t%d\t", i, item.release);
 
 		Node_2 *cur = item.head;
 		while (cur) {
-			printf("--> (key: %s, release: %d) ", cur->key, cur->release);
+			printf("--> [\"%s\", %d] ", cur->key, cur->release);
+			data_print(cur->data);
 			cur = cur->next;
 		}
 		printf("\n");
 	}
-	printf("--------------------------------\n");
+	printf("|_______________________________________________________________|\n");
 	printf("\n");
 }

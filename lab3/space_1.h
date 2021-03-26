@@ -4,6 +4,7 @@
 int VERBOSE;
 
 typedef struct Data Data;
+typedef struct Data_array Data_array;
 
 typedef struct Item_1 {
 	char busy; // 0 or 1
@@ -28,7 +29,8 @@ Data* space_1_find(Space_1 *space, unsigned int key);
 void space_1_collect_garbage(Space_1 *space);
 
 int space_1_insert(Space_1 *space, unsigned int key, unsigned int parent_key, Data* data);
-int space_1_remove(Space_1 *space, unsigned int key, int recurr);
+int space_1_remove(Space_1 *space, unsigned int key, int recurr, Data_array *data_array);
+int space_1_remove_all(Space_1 *space, Data_array *data_array);
 
 void space_1_print(Space_1 *space);
 

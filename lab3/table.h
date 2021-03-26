@@ -4,19 +4,8 @@
 typedef struct Space_1 Space_1;
 typedef struct Space_2 Space_2;
 
-typedef struct Info {
-	int int_1;
-	int int_2;
-	char *str;
-} Info;
-
-
-typedef struct Data {
-	Info *info;
-	unsigned int key_1;
-	char *key_2;
-} Data;
-
+typedef struct Info Info;
+typedef struct Data Data;
 
 typedef struct Table {
 	Space_1 *space_1;
@@ -28,10 +17,18 @@ Table *table_new(int space_1_max_size,
 	             int space_2_max_size,
 	             int space_2_max_key_len);
 
-int table_insert(int key_1, int parent_key_1, char *key_2);
+Table *table_delete(Table *table);
 
-Data* table_find(int key_1, char *key_2);
+int table_insert(Table *table, int key_1, int parent_key_1, char *key_2, Info info);
 
-void data_print(Data *data);
+Data* table_find_data(Table *table, int key_1, char *key_2);
+
+const Info* table_find(Table *table, int key_1, char *key_2);
+
+int table_remove(Table *table, int key_1, char *key_2, int recurr);
+int table_remove_all(Table *table);
+
+void table_print(Table *table, int opt);
+
 
 #endif
