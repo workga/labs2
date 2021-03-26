@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stddef.h>
 #include <string.h>
 
 #include "table.h"
@@ -12,6 +11,7 @@
 Table *table_new(int space_1_max_size,
 				 int space_2_max_size,
 				 int space_2_max_key_len) {
+	if (VERBOSE) printf("[INFO] table_new\n");
 
 	Space_1 *space_1 = space_1_new(space_1_max_size);
 	Space_2 *space_2 = space_2_new(space_2_max_size, space_2_max_key_len);
@@ -31,7 +31,9 @@ Table *table_new(int space_1_max_size,
 	return table;
 }
 
-Table *table_delete(Table *table) {
+void table_delete(Table *table) {
+	if (VERBOSE) printf("[INFO] table_delete\n");
+
 	table_remove_all(table);
 	space_1_delete(table->space_1);
 	space_2_delete(table->space_2);
@@ -40,6 +42,8 @@ Table *table_delete(Table *table) {
 
 
 int table_insert(Table *table, int key_1, int parent_key_1, char *key_2, Info info) {
+	if (VERBOSE) printf("[INFO] table_insert\n");
+
 	if (space_2_check_key(table->space_2, key_2)) return 1;
 	if (table_find(table, key_1, key_2)) return 2;
 
@@ -62,6 +66,8 @@ int table_insert(Table *table, int key_1, int parent_key_1, char *key_2, Info in
 
 
 Data* table_find_data(Table *table, int key_1, char *key_2) {
+	if (VERBOSE) printf("[INFO] table_find_data\n");
+
 	Data *data =  space_1_find(table->space_1, key_1);
 
 	if (!data || strcmp(data->key_2, key_2) != 0) return NULL;
@@ -70,6 +76,8 @@ Data* table_find_data(Table *table, int key_1, char *key_2) {
 
 
 const Info* table_find(Table *table, int key_1, char *key_2) {
+	if (VERBOSE) printf("[INFO] table_find\n");
+
 	Data* data = table_find_data(table, key_1, key_2);
 
 	if (!data) return NULL;
@@ -78,7 +86,7 @@ const Info* table_find(Table *table, int key_1, char *key_2) {
 
 
 int table_remove(Table *table, int key_1, char *key_2, int recurr) {
-	printf("[INFO] table_remove\n");
+	if (VERBOSE) printf("[INFO] table_remove\n");
 
 	if (space_2_check_key(table->space_2, key_2)) return 1;
 	Data* data = table_find_data(table, key_1, key_2);
@@ -99,10 +107,12 @@ int table_remove(Table *table, int key_1, char *key_2, int recurr) {
 	}
 
 	free(data_array.array);
+
+	return 0;
 }
 
 int table_remove_all(Table *table) {
-	printf("[INFO] table_remove_all\n");
+	if (VERBOSE) printf("[INFO] table_remove_all\n");
 
 	Data_array data_array;
 	data_array.array = (Data**)calloc(table->space_1->max_size, sizeof(Data*));
@@ -118,6 +128,8 @@ int table_remove_all(Table *table) {
 	}
 
 	free(data_array.array);
+
+	return 0;
 }
 
 

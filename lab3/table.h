@@ -17,7 +17,7 @@ Table *table_new(int space_1_max_size,
 	             int space_2_max_size,
 	             int space_2_max_key_len);
 
-Table *table_delete(Table *table);
+void table_delete(Table *table);
 
 int table_insert(Table *table, int key_1, int parent_key_1, char *key_2, Info info);
 

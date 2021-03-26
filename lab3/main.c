@@ -2,81 +2,88 @@
 // - add Data_array_new()
 // - add table_find_1() and table_remove_1() (and 2 - it is space)
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "table.h"
+#include "data.h"
 #include "space_1.h"
 #include "space_2.h"
-#include "data.h"
+#include "table.h"
+#include "menu.h"
 
-int VERBOSE = 0;
+int VERBOSE = 1;
 
 const int SPACE_1_MAX_SIZE    = 10;
-const int SPACE_2_MAX_SIZE    = 1;
+const int SPACE_2_MAX_SIZE    = 3;
 const int SPACE_2_MAX_KEY_LEN = 3;
 
-void test_table();
-
-//--------------------------------------
-//-----------/ MAIN /-------------------
-//--------------------------------------
 int main(int argc, const char** argv) {
-	test_table();
-
-	return 0;
-}
-//--------------------------------------
-//--------------------------------------
-//--------------------------------------
-
-void test_table() {
 	Table *table = table_new(SPACE_1_MAX_SIZE,
-							 SPACE_2_MAX_SIZE,
-							 SPACE_2_MAX_KEY_LEN);
+						 	 SPACE_2_MAX_SIZE,
+						 	 SPACE_2_MAX_KEY_LEN);
 
-	table_print(table, 1);
-	table_print(table, 2);
-
+	//EXAMPLE:
 	Info info = {10, 20, "boom"};
-
 	table_insert(table, 1, 0, "a", info);
 	table_insert(table, 2, 1, "a", info);
-	table_insert(table, 2, 2, "a", info);// wrong
-	table_insert(table, 3, 4, "a", info);// wrong
 	table_insert(table, 3, 1, "b", info);
 	table_insert(table, 4, 0, "c", info);
 	table_insert(table, 5, 4, "d", info);
-	table_insert(table, 6, 2, "e", info);//wrong
-	table_insert(table, 6, 2, "long", info);
-
-	table_print(table, 1);
-	table_print(table, 2);
 
 
 
-	table_remove(table, 4, "c", 1);
-
-	table_print(table, 1);
-	table_print(table, 2);
-
-	table_remove_all(table);
-
-	table_print(table, 1);
-	table_print(table, 2);
-
-
-
-	table_insert(table, 1, 0, "a", info);
-	table_insert(table, 2, 1, "a", info);
-	table_insert(table, 2, 2, "a", info);// wrong
-	table_insert(table, 3, 4, "a", info);// wrong
-
-	table_print(table, 1);
-	table_print(table, 2);
+	start(table);
 
 	table_delete(table);
+	return 0;
 }
+
+//---------------------------------------------------------------------------------
+
+// void test_table() {
+// 	Table *table = table_new(SPACE_1_MAX_SIZE,
+// 							 SPACE_2_MAX_SIZE,
+// 							 SPACE_2_MAX_KEY_LEN);
+
+// 	table_print(table, 1);
+// 	table_print(table, 2);
+
+// 	Info info = {10, 20, "boom"};
+
+// 	table_insert(table, 1, 0, "a", info);
+// 	table_insert(table, 2, 1, "a", info);
+// 	table_insert(table, 2, 2, "a", info);// wrong
+// 	table_insert(table, 3, 4, "a", info);// wrong
+// 	table_insert(table, 3, 1, "b", info);
+// 	table_insert(table, 4, 0, "c", info);
+// 	table_insert(table, 5, 4, "d", info);
+// 	table_insert(table, 6, 2, "e", info);//wrong
+// 	table_insert(table, 6, 2, "long", info);
+
+// 	table_print(table, 1);
+// 	table_print(table, 2);
+
+
+
+// 	table_remove(table, 4, "c", 1);
+
+// 	table_print(table, 1);
+// 	table_print(table, 2);
+
+// 	table_remove_all(table);
+
+// 	table_print(table, 1);
+// 	table_print(table, 2);
+
+
+
+// 	table_insert(table, 1, 0, "a", info);
+// 	table_insert(table, 2, 1, "a", info);
+// 	table_insert(table, 2, 2, "a", info);// wrong
+// 	table_insert(table, 3, 4, "a", info);// wrong
+
+// 	table_print(table, 1);
+// 	table_print(table, 2);
+
+// 	table_delete(table);
+// }
 
 
 // void test_space(int num, int verbose) {

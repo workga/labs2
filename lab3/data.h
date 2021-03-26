@@ -21,9 +21,9 @@ typedef struct Data_array {
 } Data_array;
 
 Data* data_new(Info info);
-
 void data_delete(Data *data);
 
-void data_print(Data *data);
+void data_print(const Data *data);
+void info_print(const Info *info);
 
 #endif

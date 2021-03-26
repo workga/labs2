@@ -1,4 +1,6 @@
 *.o
 *.a
 main
+test
+logs.txt
 /notes.txt

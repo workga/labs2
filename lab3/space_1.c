@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stddef.h>
 
 #include "space_1.h"
 #include "data.h"
@@ -153,6 +152,7 @@ void space_1_print(Space_1 *space) {
     printf("|^^^^^^^^^^^/ SPACE_1 /^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|\n");
     printf("busy\tkey\tparent\tdata\n");
 	for (int i = 0; i < space->size; i++) {
+		if(space->items[i].busy == 0) continue;
 		printf("%d\t%d\t%d\t",
 			space->items[i].busy,
 			space->items[i].key,

@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stddef.h>
 #include <string.h>
 
 #include "data.h"
@@ -36,10 +35,16 @@ void data_delete(Data *data) {
 }
 
 
-void data_print(Data *data) {
+void data_print(const Data *data) {
 	if (!data) printf("(NULL)");
-	else printf("(%d, %d, %s)",
-				data->info->int_1,
-				data->info->int_2,
-				data->info->str);
+	else info_print(data->info);
+	//here we can also print keys and release
+}
+
+void info_print(const Info *info) {
+	if (!info) printf("(NULL)");
+	else printf("(%d, %d, \"%s\")",
+				info->int_1,
+				info->int_2,
+				info->str);
 }
