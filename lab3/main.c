@@ -8,7 +8,7 @@
 #include "table.h"
 #include "menu.h"
 
-int VERBOSE = 1;
+int VERBOSE = 0;
 
 const int SPACE_1_MAX_SIZE    = 10;
 const int SPACE_2_MAX_SIZE    = 3;

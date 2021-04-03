@@ -108,9 +108,8 @@ int space_1_find_index(Space_1 *space, unsigned int key) {
     Item_1 item;
 	for(int i = 0; i < space->size; i++) {
 		item = space->items[i];
-		if (item.key == key) {
-			if (item.busy) return i;
-			else return -1;
+		if ((item.key == key) && (item.busy)) {
+            return i;
 		}
 	}
 

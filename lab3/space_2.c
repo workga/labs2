@@ -71,7 +71,8 @@ void space_2_delete(Space_2 *space) {
 int space_2_hash(Space_2 *space, char *key) {
 	if (VERBOSE) printf("[INFO] space_2_hash\n");
 	int h = 0;
-	for (int i = 0; i < (int)strlen(key); i++) {
+	int len = strlen(key);
+	for (int i = 0; i < len; i++) {
 		h = h^(int)key[i];
 	}
 	h %= space->max_size;

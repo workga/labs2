@@ -29,9 +29,8 @@ char* get_str() {
     do {
         n = scanf("%80[^\n]", buf);
         if (n < 0) {
-            if (!res) {
-                return NULL;
-            }
+        	free(res);
+        	return NULL;
         } else if (n > 0) {
             int new_len = len + strlen(buf);
             res = realloc(res, new_len + 1);
@@ -43,10 +42,9 @@ char* get_str() {
     } while (n > 0);
 
     if (len > 0) {
-        res[len] = '\0';
-    }
-    else {
-        res = calloc(1, sizeof(char));
+    	res[len] = '\0';
+    } else {
+    	res = (char*)calloc(1, sizeof(char));
     }
 
     return res;
@@ -207,7 +205,7 @@ void start(Table *table) {
 	int (*dialog_functions[])(Table*) = {NULL, dialog_add, dialog_find, dialog_delete, dialog_show};
 
 	int opt;
-	while(opt = dialog(menu, menu_size)) {
+	while((opt = dialog(menu, menu_size))) {
 		if (opt == 0 || dialog_functions[opt](table)) break;
 	}
 
