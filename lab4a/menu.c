@@ -4,6 +4,7 @@
 
 #include "tree.h"
 #include "menu.h"
+#include "test.h"
 
 
 int get_int(int *opt) {
@@ -125,7 +126,7 @@ int dialog_delete(Tree *tree) {
 int dialog_show(Tree *tree) {
 	printf("[SHOW]\n");
 
-	printf("Choose:\n1) order by key\n2) print as a tree\n");
+	printf("Choose:\n1) order by key\n2) print as a tree\n3) graphviz (DOT)\n");
 	int opt;
 	if(get_int(&opt)) return 1;
 
@@ -133,9 +134,23 @@ int dialog_show(Tree *tree) {
 		tree_print(tree);
 	} else if (opt == 2) {
 		tree_draw(tree);
+	} else if (opt == 3) {
+		tree_make_graphviz(tree);
 	} else {
 		printf("[ERROR] Invalid option!");
 	}
+
+	return 0;
+}
+
+int dialog_test(Tree *tree) {
+	printf("[Test]\n");
+
+	printf("Enter the number of elements\n");
+	int num;
+	if(get_int(&num)) return 1;
+
+	if (test(num)) return 1;
 
 	return 0;
 }
@@ -162,13 +177,15 @@ int dialog(const char *menu[], const int menu_size) {
 	return opt;
 }
 
+
 void start(Tree *tree) {
 	const char *menu[] = {"0. Quit",
 					  	  "1. Add",
 					      "2. Find",
 					      "3. Find by max key",
 					      "4. Delete",
-					      "5. Show"};
+					      "5. Show",
+					  	  "6. Test"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
 	int (*dialog_functions[])(Tree*) = {NULL,
@@ -176,7 +193,8 @@ void start(Tree *tree) {
 										dialog_find,
 										dialog_find_by_max_key,
 										dialog_delete,
-										dialog_show};
+										dialog_show,
+										dialog_test};
 
 	int opt;
 	while((opt = dialog(menu, menu_size))) {

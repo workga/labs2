@@ -31,6 +31,8 @@ void tree_print(Tree *tree);
 void tree_print_traversal(Node *ptr);
 void tree_draw(Tree *tree);
 void tree_draw_traversal(Node *ptr, int offset);
+void tree_make_graphviz(Tree *tree);
+void tree_make_graphviz_traversal(Node *ptr);
 
 int tree_load(char *filename);
 

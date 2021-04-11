@@ -10,8 +10,6 @@
 #include "tree.h"
 
 
-
-
 Node* node_new(Node *parent, Node *left, Node *right, char *key, char *info) {
 	if (!key) return NULL;
 	if (!info) return NULL;
@@ -32,7 +30,6 @@ Node* node_new(Node *parent, Node *left, Node *right, char *key, char *info) {
 		return NULL;
 	}
 
-	//-------------------------------------------------------------------------
 
 	node->parent = parent;
 	node->left   = left;
@@ -111,34 +108,64 @@ int tree_insert(Tree *tree, char *key, char *info) {
 
 
 int tree_remove(Tree *tree, char *key) {
-	printf("[INFO] tree_remove() was not implemented!");
-	// Node *ptr = tree_find(tree, key);
-	// if (!node) return 2;
+	if (!tree) return 1;
 
-	// if (tree->root == ptr) {
-	// 	tree->root = NULL;
-	// 	node_delete(ptr);
-	// }
-
-	// if (ptr->left && ptr->right) {
-
-	// }
-	// else if (!ptr->left && !ptr->right) {
-	// 	if (node_side(ptr) < 0)
-	// 		ptr->parent->left = NULL;
-	// 	else
-	// 		ptr->parent->right = NULL;
-	// } else {
-	// 	if (ptr->left) {
-	// 		if(node_side(ptr)) {
-
-	// 		}
+	Node *ptr = tree_find(tree, key);
+	if (!ptr) return 2;
 
 
-	// 	} else {
+	if (ptr->left && ptr->right) { // ptr has 2 children
+		Node *ptr_next = tree_find_min(ptr->right);
+		
+		Node *child = ptr_next->right;
 
-	// 	}
-	// }
+		int side = node_side(ptr_next);
+		if (side < 0) // ptr_next is left child
+			ptr_next->parent->left = child;
+		else // ptr_next is right child
+			ptr_next->parent->right = child;
+		// ptr_next isn't root;
+
+		if (child) {
+			child->parent = ptr_next->parent;
+		}
+
+		char *buf;
+		buf = ptr->key;
+		ptr->key = ptr_next->key;
+		ptr_next->key = buf;
+		buf = ptr->info;
+		ptr->info = ptr_next->info;
+		ptr_next->info = buf;
+
+		node_delete(ptr_next);
+
+
+	} else { // ptr has less than 2 children
+		Node *child;
+		if (ptr->left)
+			child = ptr->left;
+		else if (ptr->right)
+			child = ptr->right;
+		else
+			child = NULL;
+		
+
+		if (child)
+			child->parent = ptr->parent;
+		
+
+		int side = node_side(ptr);
+		if (side < 0) // ptr is left child
+			ptr->parent->left = child;
+		else if (side > 0) // ptr is right child
+			ptr->parent->right = child;
+		else // ptr is root;
+			tree->root = child;
+
+		node_delete(ptr);
+	} 
+
 	return 0;
 }
 
@@ -199,9 +226,36 @@ void tree_draw_traversal(Node *ptr, int offset) {
     for(int i = 0; i < offset; i++) {
         printf("\t\t");
     }
-    printf("(\"%s\", \"%s\")\n\n\n", ptr->key, ptr->info);
+    char c;
+    if (node_side(ptr) < 0) c = '\\';
+    else if (node_side(ptr) > 0) c = '/';
+    else c = ' ';
+    printf("%c (\"%s\", \"%s\")\n", c, ptr->key, ptr->info);
 
     tree_draw_traversal(ptr->left, offset + 1);
+}
+
+
+void tree_make_graphviz(Tree *tree) {
+	printf("/----- DOT BEGIN -----/\n");
+	printf("digraph G {\n");
+	tree_make_graphviz_traversal(tree->root);
+	printf("}\n");
+	printf("/------ DOT END  -----/\n");
+}
+
+void tree_make_graphviz_traversal(Node *ptr) {
+    if (!ptr) return;
+
+    tree_make_graphviz_traversal(ptr->left);
+    if (ptr->parent) {
+	    printf("\"%s : %s\" -> \"%s : %s\"\n",
+	    	   ptr->parent->key,
+	    	   ptr->parent->info,
+	    	   ptr->key,
+	    	   ptr->info);
+    }
+    tree_make_graphviz_traversal(ptr->right);
 }
 
 int tree_load(char *filename) {
@@ -249,24 +303,6 @@ Node* tree_find_max(Node *ptr) {
 }
 
 
-Node* tree_find_next(Node *ptr) {
-	/*if (!ptr) return NULL;
-
-	Node *parent;
-	if (ptr->right) return tree_find_min(ptr->right);
-	else {
-		parent = ptr->parent;
-		while (parent && (parent->right == ptr)) {
-			ptr = parent;
-			parent = parent->parent;
-		}
-	}
-
-	return parent;*/
-	return NULL;
-}
-
-
 int node_side(Node *ptr) {
 	if(!ptr) return 0;
 	if(!ptr->parent) return 0;
@@ -276,3 +312,16 @@ int node_side(Node *ptr) {
 		return 1;
 }
 
+
+Node* tree_find_next(Node *ptr) {
+	if (!ptr) return NULL;
+
+	Node *parent;
+	if (ptr->right) return tree_find_min(ptr->right);
+	
+	while (ptr->parent && node_side(ptr) > 0) {
+		ptr = ptr->parent;
+	}
+
+	return ptr->parent; // maybe NULL
+}

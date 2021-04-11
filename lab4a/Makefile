@@ -1,2 +1,2 @@
 all:
-	gcc -Wall -Wextra main.c tree.c menu.c -o main -std=c99
+	gcc -Wall -Wextra main.c tree.c menu.c test.c -lm -o main -std=c99
