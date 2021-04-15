@@ -34,7 +34,7 @@ void tree_draw_traversal(Node *ptr, int offset);
 void tree_make_graphviz(Tree *tree);
 void tree_make_graphviz_traversal(Node *ptr);
 
-int tree_load(char *filename);
+int tree_load(Tree *tree);
 
 Node* tree_find_target_parent(Tree *tree, char *key);
 Node* tree_find_min(Node *ptr);

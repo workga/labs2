@@ -155,6 +155,12 @@ int dialog_test(Tree *tree) {
 	return 0;
 }
 
+int dialog_load(Tree *tree) {
+	if(tree_load(tree)) printf("Couldn't load the file");
+	else printf("File was loaded");
+	return 0;
+}
+
 
 int dialog(const char *menu[], const int menu_size) {
 	char *error_msg = "";
@@ -185,7 +191,8 @@ void start(Tree *tree) {
 					      "3. Find by max key",
 					      "4. Delete",
 					      "5. Show",
-					  	  "6. Test"};
+					  	  "6. Test",
+					  	  "7. Load"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
 	int (*dialog_functions[])(Tree*) = {NULL,
@@ -194,7 +201,8 @@ void start(Tree *tree) {
 										dialog_find_by_max_key,
 										dialog_delete,
 										dialog_show,
-										dialog_test};
+										dialog_test,
+										dialog_load};
 
 	int opt;
 	while((opt = dialog(menu, menu_size))) {

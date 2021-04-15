@@ -1,8 +1,3 @@
-// [FEATURE] use only one traversal function
-// [FEATURE] add timer
-// [FEATURE] add loading from file
-// [FEATURE] add beautiful drawing?
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -245,9 +240,21 @@ void tree_make_graphviz(Tree *tree) {
 }
 
 void tree_make_graphviz_traversal(Node *ptr) {
-    if (!ptr) return;
+    if (!ptr) return; // never happens
 
-    tree_make_graphviz_traversal(ptr->left);
+    if (ptr->left) tree_make_graphviz_traversal(ptr->left);
+    else {
+    	printf("\"%s : %s\" -> \"(%s : %s)_left\"\n",
+    			ptr->key,
+    			ptr->info,
+    			ptr->key,
+    			ptr->info);
+    	printf("\"(%s : %s)_left\"[shape=point]\n",
+    			ptr->key,
+    			ptr->info);
+   	}
+
+
     if (ptr->parent) {
 	    printf("\"%s : %s\" -> \"%s : %s\"\n",
 	    	   ptr->parent->key,
@@ -255,10 +262,46 @@ void tree_make_graphviz_traversal(Node *ptr) {
 	    	   ptr->key,
 	    	   ptr->info);
     }
-    tree_make_graphviz_traversal(ptr->right);
+
+    if (ptr->right) tree_make_graphviz_traversal(ptr->right);
+    else {
+    	printf("\"%s : %s\" -> \"(%s : %s)_right\"\n",
+    			ptr->key,
+    			ptr->info,
+    			ptr->key,
+    			ptr->info);
+    	printf("\"(%s : %s)_right\"[shape=point]\n",
+    			ptr->key,
+    			ptr->info);
+    }
 }
 
-int tree_load(char *filename) {
+int tree_load(Tree *tree) {
+	FILE *fp;
+
+	int max_len = 10;
+	char key[10];
+	char info[10];
+
+	if (!(fp = fopen("input.txt", "r"))) return 1;
+
+	tree_delete_traversal(tree->root);
+	tree->root = NULL;
+
+	while (fgets(key, sizeof(key), fp)) {
+		if (!fgets(info, sizeof(info), fp)) {
+			printf("Couldn't read the info\n");
+			printf("%d\n", ferror(fp));
+			break;
+		} else {
+			if (key[strlen(key) - 1] == '\n')
+				key[strlen(key) - 1] = '\0';
+			if (info[strlen(info) - 1] == '\n')
+				info[strlen(info) - 1] = '\0';
+			tree_insert(tree, key, info);
+		}
+	}
+
 	return 0;
 }
 

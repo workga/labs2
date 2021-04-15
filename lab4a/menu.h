@@ -9,6 +9,7 @@ int dialog_find(Tree *tree);
 int dialog_find_by_max_key(Tree *tree);
 int dialog_delete(Tree *tree);
 int dialog_show(Tree *tree);
+int dialog_load(Tree *tree);
 
 int dialog(const char *menu[], const int menu_size);
 
