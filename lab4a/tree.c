@@ -75,7 +75,6 @@ int tree_insert(Tree *tree, char *key, char *info) {
 	if (!tree) return 1;
 
 	if (tree_find(tree, key)) {
-		printf("[ERROR] Duplicate key!");
 		return 2;
 	}
 

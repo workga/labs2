@@ -4,13 +4,28 @@
 
 #include "tree.h"
 #include "menu.h"
-#include "test.h"
 
 
+//----/  Input /---------------------------------------------------------------
 int get_int(int *opt) {
 	int error;
 	do {
 		error = scanf("%d", opt);
+		if (error < 0) return 1;//EOF
+		if (error == 0) {
+			printf("Invalid input. Please, repeate.\n");
+			scanf("%*[^\n]");
+		}
+	} while (error == 0);
+	scanf("%*c");
+	return 0;
+}
+
+
+int get_float(float *opt) {
+	int error;
+	do {
+		error = scanf("%f", opt);
 		if (error < 0) return 1;//EOF
 		if (error == 0) {
 			printf("Invalid input. Please, repeate.\n");
@@ -52,83 +67,71 @@ char* get_str() {
     return res;
 }
 
-//-----------------------------------------------------------------------------
 
-
-int dialog_add(Tree *tree) {
+//----/  Dialog /--------------------------------------------------------------
+int dialog_add(Node **tree) {
 	printf("[ADD]\n");
 
-	printf("Enter key:\n");
-	char *key;
-	if(!(key = get_str())) return 1;
+	printf("Enter key (int):\n");
+	int key;
+	if(get_int(&key)) return 1;
 
-	printf("Enter info:\n");
-	char *info;
-	if(!(info = get_str())) {
-		free(key);
-		return 1;
-	}
+	printf("Enter info.flt (float):\n");
+	float flt;
+	if(get_float(&flt)) return 1;
 
-
-	if (tree_insert(tree, key, info) == 2) {
-		printf("[ERROR] Duplicate key!");
-	}
+	printf("Enter info str (string):\n");
+	char *str;
+	if(!(str = get_str())) return 1;
 
 
-	free(key);
-	free(info);
+	//-------------------------------------------
+	if (tree_insert(tree, key, flt, str)) return 1;
+
+	free(str);
 	return 0;
 }
 
 
-int dialog_find(Tree *tree) {
+int dialog_find(Node **tree) {
 	printf("[FIND]\n");
 
-	printf("Enter key:\n");
-	char *key;
-	if(!(key = get_str())) return 1;
+	printf("Enter key (int):\n");
+	int key;
+	if(get_int(&key)) return 1;
+
+	printf("Enter release (int):\n");
+	int num;
+	if(get_int(&num)) return 1;
 
 
-	const Node *ptr = tree_find(tree, key);
-	if (!ptr)
-        printf("[FIND] Key \"%s\" not found\n", key);
-	else
-        printf("[FIND] Found: Key: \"%s\"\tInfo: \"%s\"\n", ptr->key, ptr->info);
-
-	free(key);
-	return 0;
-}
-
-
-int dialog_find_by_max_key(Tree *tree) {
-	printf("[MAX KEY]\n");
-
-
-	const Node *ptr = tree_find_by_max_key(tree);
-	if (!ptr) printf("[MAX KEY] Tree is empty\n");
-    else printf("[MAX KEY] Found: Key: \"%s\"\tInfo: \"%s\"\n", ptr->key, ptr->info);
+	Info *info  = tree_find_info(*tree, key, num);
+	if (!info) printf("Not found");
+	else 
+		printf("Found: \"(k=%d, r=%d : [%4.2f, \'%s\'])\"",
+				key, num, info->flt, info->str);
 
 	return 0;
 }
 
 
-int dialog_delete(Tree *tree) {
+int dialog_find_min_greater(Node **tree) {
+	printf("[MIN GREATER]\n");
+	printf("Not implemented yet\n");
+	//...
+	return 0;
+}
+
+
+int dialog_delete(Node **tree) {
 	printf("[DELETE]\n");
-
-	printf("Enter key:\n");
-	char *key;
-	if(!(key = get_str())) return 1;
-
-
-	tree_remove(tree, key);
-
-
-	free(key);
+	printf("Not implemented yet\n");
+	//...
 	return 0;
 }
 
 
-int dialog_show(Tree *tree) {
+int dialog_show(Node **tree) {
 	printf("[SHOW]\n");
 
 	printf("Choose:\n1) order by key\n2) print as a tree\n3) graphviz (DOT)\n");
@@ -136,11 +139,11 @@ int dialog_show(Tree *tree) {
 	if(get_int(&opt)) return 1;
 
 	if (opt == 1) {
-		tree_print(tree);
+		tree_print(*tree);
 	} else if (opt == 2) {
-		tree_draw(tree);
+		tree_draw(*tree, 0);
 	} else if (opt == 3) {
-		tree_make_graphviz(tree);
+		tree_make_graphviz(*tree, 1);
 	} else {
 		printf("[ERROR] Invalid option!");
 	}
@@ -148,21 +151,17 @@ int dialog_show(Tree *tree) {
 	return 0;
 }
 
-int dialog_test(Tree *tree) {
-	printf("[Test]\n");
-
-	printf("Enter the number of elements\n");
-	int num;
-	if(get_int(&num)) return 1;
-
-	if (test(num)) return 1;
-
+int dialog_test(Node **tree) {
+	printf("[TEST]\n");
+	printf("Not implemented yet\n");
+	//...
 	return 0;
 }
 
-int dialog_load(Tree *tree) {
-	if(tree_load(tree)) printf("Couldn't load the file");
-	else printf("File was loaded");
+int dialog_load(Node **tree) {
+	printf("[LOAD]\n");
+	printf("Not implemented yet\n");
+	//...
 	return 0;
 }
 
@@ -189,21 +188,21 @@ int dialog(const char *menu[], const int menu_size) {
 }
 
 
-void start(Tree *tree) {
+void start(Node **tree) {
 	const char *menu[] = {"0. Quit",
 					  	  "1. Add",
 					      "2. Find",
-					      "3. Find by max key",
+					      "3. Find min greater",
 					      "4. Delete",
 					      "5. Show",
 					  	  "6. Test",
 					  	  "7. Load"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
-	int (*dialog_functions[])(Tree*) = {NULL,
+	int (*dialog_functions[])(Node**) = {NULL,
 										dialog_add,
 										dialog_find,
-										dialog_find_by_max_key,
+										dialog_find_min_greater,
 										dialog_delete,
 										dialog_show,
 										dialog_test,
