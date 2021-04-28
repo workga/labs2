@@ -39,8 +39,6 @@ int   node_height(Node *node);
 //--------/ AVL functions /----------------------------------------------------------
 Node* node_rotate_left(Node *node);
 Node* node_rotate_right(Node *node);
-//Node* node_big_rotate_left(Node **p_node);
-//Node* node_big_rotate_right(Node **p_node);
 int   node_bfactor(Node *node);
 int   node_fix_height(Node *node);
 
@@ -53,9 +51,10 @@ void  tree_delete(Node *tree);
 
 Node* tree_find(Node *node, int key);
 Node* tree_find_min(Node *node);
+Node* tree_find_next(Node *node);
 Node* tree_find_target_parent(Node *node, int key);
 const Info* tree_find_info(Node *node, int key, int num);
-const Info* tree_find_min_greater(Node *node, int key, int num);
+const Info* tree_find_min_greater(Node *node, int key);
 
 int   tree_insert(Node **tree, int key, float flt, char *str);
 int   tree_remove(Node **tree, int key);
@@ -64,6 +63,7 @@ int   tree_remove(Node **tree, int key);
 
 //--------/ Tree Utils /-------------------------------------------------------------
 void  tree_print(Node *node);
+void  tree_print_range(Node *node, int key_min, int key_max);
 void  tree_draw(Node *node, int offset);
 void  tree_make_graphviz(Node *node, int first);
 

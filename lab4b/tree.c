@@ -103,7 +103,9 @@ int node_remove_back(Node *node) {
 		cur = cur->next;
 	}
 
-	prev->next = NULL;
+	if (prev) prev->next = NULL;
+	else node->info = NULL;
+
 	info_delete(cur);
 
 	node->len--;
@@ -113,6 +115,7 @@ int node_remove_back(Node *node) {
 
 
 int node_side(Node *node) {
+    if (!node) return 0;
 	if(!node->parent) return 0;
 	if (node->parent->left == node)
 		return -1;
@@ -169,30 +172,6 @@ Node* node_rotate_right(Node *node) {
 }
 
 
-Node* node_big_rotate_left(Node **p_node) {
- //    tree_draw(*p_node, 0);
-	// Node *x = *p_node;
-	// Node *y = x->right;
-
-	// node_rotate_right(&y);
- //    tree_draw(*p_node, 0);
- //    //node_rotate_left(&x);
-
-	// return y;
-}
-
-
-Node* node_big_rotate_right(Node **p_node) {
-	// Node *x = *p_node;
-	// Node *y = x->left;
-
-	// node_rotate_left(&y);
-	// node_rotate_right(&x);
-
-	// return y;
-}
-
-
 int node_bfactor(Node *node) {
 	if (!node) return 0;
 	return node_height(node->right) - node_height(node->left);
@@ -200,6 +179,7 @@ int node_bfactor(Node *node) {
 
 
 int node_fix_height(Node *node) {
+    if (!node) return 0;
 	int h_left   = node_height(node->left);
 	int h_right  = node_height(node->right);
 	node->h = (h_left > h_right ? h_left : h_right) + 1;
@@ -208,6 +188,10 @@ int node_fix_height(Node *node) {
 
 
 Node* node_balance(Node *node) {
+    if (!node) {
+        if (DEBUG) printf("[DEBUG] Attemption to balance NULL");
+        return NULL;
+    }
 	Node *p = node;
 	node_fix_height(p);
 
@@ -222,7 +206,7 @@ Node* node_balance(Node *node) {
 		return node_rotate_right(p);
 	}
 	else {
-		if (DEBUG) printf("[DEBUG] No need to balance node with key %d", node->key);
+		if (DEBUG) printf("[DEBUG] No need to balance node with key %d\n", node->key);
 		return p;
 	}
 }
@@ -265,6 +249,19 @@ Node* tree_find_min(Node *node) {
 }
 
 
+Node* tree_find_next(Node *node) {
+	if (!node) return NULL;
+
+	if (node->right) return tree_find_min(node->right);
+
+	while (node->parent && node_side(node) > 0) {
+		node = node->parent;
+	}
+
+	return node->parent; // maybe NULL
+}
+
+
 Node* tree_find_target_parent(Node *node, int key) {
 	Node *parent = NULL;
 	Node *cur    = node;
@@ -293,8 +290,33 @@ const Info* tree_find_info(Node *node, int key, int num) {
 }
 
 
-const Info* tree_find_min_greater(Node *node, int key, int num) {
-	//...
+const Info* tree_find_min_greater(Node *node, int key) {
+	if (!node) return NULL;
+
+	Node *cur = node;
+	Node *prev = NULL;
+
+	while (cur) {
+		prev = cur;
+		if (key < cur->key) {
+			cur = cur->left;
+		} else if (key > cur->key) {
+			cur = cur->right;
+		}
+		else {
+			Node *next_node = tree_find_next(cur);
+			if (!next_node) return NULL;
+			else return next_node->info;
+		}
+	}
+
+	if (key < prev->key)
+		return prev->info;
+	else {
+		Node *next_node = tree_find_next(prev);
+		if (!next_node) return NULL;
+		else return next_node->info;
+	}
 }
 
 
@@ -339,30 +361,20 @@ int tree_insert(Node **tree, int key, float flt, char *str) {
 		x = p;
 		p = p->parent;
 	}
-    //4???
+
 	if (!p || node_bfactor(p) == 0) return 0; //height didn't change
 
-    /*
-    if (!p) return 0;
-
-	if ((node_side(x) < 0 && node_bfactor(p) ==  1) ||
-		(node_side(x) > 0 && node_bfactor(p) == -1) ) {
-		//node_fix_height(p); //no need
-		return 0;
-	}*/
 
 	// only if (node_bfactor(p) == 2 or -2)
-	//Node *new_p = node_balance(p);
 
 	// node_balance(p) doesn't change nodes above p
-    if (node_side(p) < 0)
+	int side = node_side(p);
+    if (side < 0)
         p->parent->left = node_balance(p);
-	else if (node_side(p) > 0)
+	else if (side > 0)
         p->parent->right = node_balance(p);
     else
     	*tree = node_balance(p);
-
-
 
 	return 0;
 }
@@ -372,11 +384,105 @@ int tree_remove(Node **tree, int key) {
 	Node* found_node = tree_find(*tree, key);
 	if (!found_node) return 1;
 
-	node_remove_back(found_node);
-	if (found_node->len > 0) return 0;
+	if (node_remove_back(found_node)) return 0; // if found_node->len remains > 0
 
 	// main case: delete node because its len == 0
-	//!!!
+    Node *x;
+    Node *p;
+    int old_h;
+	if (found_node->left && found_node->right) { // found_node has 2 children
+		// extract next_node from tree
+		Node *next_node  = tree_find_min(found_node->right);
+		Node *child_node = next_node->right;
+
+		// for following balance
+		x = child_node;
+		p = next_node->parent;
+		old_h = node_height(p);
+		if (p == found_node) p = next_node;
+
+		int side = node_side(next_node);
+		if (side < 0)
+			next_node->parent->left = child_node;
+		else
+			next_node->parent->right = child_node;
+
+		if (child_node) {
+			child_node->parent = next_node->parent;
+		}
+
+		// replace found_node with next_node
+        next_node->left  = found_node->left;
+        next_node->right = found_node->right;
+        if (found_node->left) found_node->left->parent = next_node;
+        if (found_node->right)found_node->right->parent = next_node;
+
+        next_node->parent = found_node->parent;
+
+		side = node_side(found_node);
+		if (side < 0)
+			found_node->parent->left = next_node;
+		else if (side > 0)
+			found_node->parent->right = next_node;
+		else // if it was root
+			*tree = next_node;
+
+        node_delete(found_node); // is it clean?
+	} else { // found_node has less than 2 children
+		Node *child_node;
+		if (found_node->left)
+			child_node = found_node->left;
+		else if (found_node->right)
+			child_node = found_node->right;
+		else
+			child_node = NULL;
+
+        // for following balance
+        x = child_node;
+		p = found_node->parent;
+		old_h = node_height(p);
+
+
+		if (child_node)
+			child_node->parent = found_node->parent;
+
+		int side = node_side(found_node);
+		if (side < 0)
+			found_node->parent->left  = child_node;
+		else if (side > 0)
+			found_node->parent->right = child_node;
+		else
+			*tree = child_node;
+
+		node_delete(found_node);
+	}
+
+    if (DEBUG) {
+        printf("[DEBUG] Before rebalancing:\n");
+        tree_draw(*tree, 0);
+    }
+	//balance
+    while (p && (node_fix_height(p) != old_h || node_bfactor(p) == 2 || node_bfactor(p) == -2)) {
+
+        int side = node_side(p);
+        if (side < 0)
+            p->parent->left = node_balance(p);
+        else if (side > 0)
+            p->parent->right = node_balance(p);
+        else
+            *tree = node_balance(p);
+
+        x = p;
+        p = p->parent;
+        old_h = node_height(p);
+    }
+
+    if (DEBUG) {
+        printf("[DEBUG] After rebalancing:\n");
+        tree_draw(*tree, 0);
+    }
+
+	return 0;
 }
 
 
@@ -387,6 +493,13 @@ void tree_print(Node *node) {
 	tree_print(node->right);
 	printf("(k=%d, r=%d : [%4.2f, \"%s\"])\n", node->key, node->len, node->info->flt, node->info->str);
 	tree_print(node->left);
+}
+
+void tree_print_range(Node *node, int key_min, int key_max) {
+ //    if (!node) return;
+	// tree_print(node->right);
+	// printf("(k=%d, r=%d : [%4.2f, \"%s\"])\n", node->key, node->len, node->info->flt, node->info->str);
+	// tree_print(node->left);
 }
 
 
@@ -402,10 +515,12 @@ void tree_draw(Node *node, int offset) {
         printf("\t\t");
     }
     char c;
-    if (node_side(node) < 0) c = '\\';
-    else if (node_side(node) > 0) c = '/';
+    int side = node_side(node);
+    if (side < 0) c = '\\';
+    else if (side > 0) c = '/';
     else c = ' ';
-    printf("%c (k=%d, r=%d : [%4.2f, \"%s\"])\n", c, node->key, node->len, node->info->flt, node->info->str);
+    if (node->info) printf("%c (k=%d, r=%d : [%4.2f, \"%s\"])\n", c, node->key, node->len, node->info->flt, node->info->str);
+    else printf("null info\n");
 
 
     tree_draw(node->left, offset + 1);

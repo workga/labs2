@@ -84,8 +84,9 @@ int dialog_add(Node **tree) {
 	char *str;
 	if(!(str = get_str())) return 1;
 
-
 	//-------------------------------------------
+
+
 	if (tree_insert(tree, key, flt, str)) return 1;
 
 	free(str);
@@ -104,12 +105,13 @@ int dialog_find(Node **tree) {
 	int num;
 	if(get_int(&num)) return 1;
 
+	//-------------------------------------------
+
 
 	Info *info  = tree_find_info(*tree, key, num);
 	if (!info) printf("Not found");
-	else 
-		printf("Found: \"(k=%d, r=%d : [%4.2f, \'%s\'])\"",
-				key, num, info->flt, info->str);
+	else printf("Found: [%4.2f, \'%s\'])",
+				info->flt, info->str);
 
 	return 0;
 }
@@ -117,16 +119,36 @@ int dialog_find(Node **tree) {
 
 int dialog_find_min_greater(Node **tree) {
 	printf("[MIN GREATER]\n");
-	printf("Not implemented yet\n");
-	//...
+
+	printf("Enter key (int):\n");
+	int key;
+	if(get_int(&key)) return 1;
+
+	//-------------------------------------------
+
+
+	Info *info = tree_find_min_greater(*tree, key);
+	if (!info) printf("There is no greater elements");
+	else printf("Next element: [%4.2f, \'%s\'])",
+				info->flt, info->str);
 	return 0;
 }
 
 
 int dialog_delete(Node **tree) {
 	printf("[DELETE]\n");
-	printf("Not implemented yet\n");
-	//...
+
+	printf("Enter key (int):\n");
+	int key;
+	if(get_int(&key)) return 1;
+
+	//-------------------------------------------
+
+
+	if (tree_remove(tree, key)) {
+		printf("Key not found");
+	}
+
 	return 0;
 }
 
@@ -137,6 +159,9 @@ int dialog_show(Node **tree) {
 	printf("Choose:\n1) order by key\n2) print as a tree\n3) graphviz (DOT)\n");
 	int opt;
 	if(get_int(&opt)) return 1;
+
+	//-------------------------------------------
+
 
 	if (opt == 1) {
 		tree_print(*tree);

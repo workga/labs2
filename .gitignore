@@ -4,3 +4,8 @@ main
 test
 logs.txt
 /notes.txt
+*.cbp
+*.layout
+*.depend
+*.swp
+*/bin/
