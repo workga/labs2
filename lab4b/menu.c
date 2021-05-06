@@ -156,7 +156,7 @@ int dialog_delete(Node **tree) {
 int dialog_show(Node **tree) {
 	printf("[SHOW]\n");
 
-	printf("Choose:\n1) order by key\n2) print as a tree\n3) graphviz (DOT)\n");
+	printf("Choose:\n1) ordered by key\n2) key in range\n3) print as a tree\n4) graphviz (DOT)\n");
 	int opt;
 	if(get_int(&opt)) return 1;
 
@@ -166,8 +166,17 @@ int dialog_show(Node **tree) {
 	if (opt == 1) {
 		tree_print(*tree);
 	} else if (opt == 2) {
+		int key_min, key_max;
+		printf("Enter min key:\n");
+		if(get_int(&key_min)) return 1;
+		printf("Enter max key:\n");
+		if(get_int(&key_max)) return 1;
+
+		tree_print_range(*tree, key_min, key_max);
+
+	} else if (opt == 3){
 		tree_draw(*tree, 0);
-	} else if (opt == 3) {
+	} else if (opt == 4) {
 		tree_make_graphviz(*tree, 1);
 	} else {
 		printf("[ERROR] Invalid option!");

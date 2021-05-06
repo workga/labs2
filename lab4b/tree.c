@@ -496,10 +496,14 @@ void tree_print(Node *node) {
 }
 
 void tree_print_range(Node *node, int key_min, int key_max) {
- //    if (!node) return;
-	// tree_print(node->right);
-	// printf("(k=%d, r=%d : [%4.2f, \"%s\"])\n", node->key, node->len, node->info->flt, node->info->str);
-	// tree_print(node->left);
+    if (!node) return;
+
+    if (node->key < key_max) 
+    	tree_print_range(node->right, key_min, key_max);
+	if ((node->key <= key_max) && (node->key >= key_min))
+		printf("(k=%d, r=%d : [%4.2f, \"%s\"])\n", node->key, node->len, node->info->flt, node->info->str);
+	if (node->key > key_min)
+    	tree_print_range(node->left, key_min, key_max);
 }
 
 
