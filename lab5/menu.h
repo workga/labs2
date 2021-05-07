@@ -16,9 +16,12 @@ int dialog_add_edge(Graph *graph);
 int dialog_delete_node(Graph *graph);
 int dialog_delete_edge(Graph *graph);
 
+int dialog_dfs(Graph *graph);
+int dialog_bf(Graph *graph);
+int dialog_rn(Graph *graph);
+
 int dialog_show(Graph *graph);
 int dialog_random(Graph *graph);
-
 
 int  dialog(const char *menu[], const int menu_size);
 void print_error(int e);

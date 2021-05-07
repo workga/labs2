@@ -172,8 +172,45 @@ int dialog_delete_edge(Graph *graph) {
 }
 
 
+int dialog_dfs(Graph *graph) {
+	printf("Enter key_1 (string):\n");
+	char *key_1;
+	if(!(key_1 = get_str())) return END_OF_FILE;
+
+	printf("Enter key_2 (string):\n");
+	char *key_2;
+	if(!(key_2 = get_str())) {
+		free(key_2);
+		return END_OF_FILE;
+	}
+
+	int e = graph_dfs(graph, key_1, key_2);
+
+	free(key_1);
+	free(key_2);
+	return e;
+}
+
+
+int dialog_bf(Graph *graph) {
+
+}
+
+
+int dialog_rn(Graph *graph) {
+
+}
+
+
 int dialog_show(Graph *graph) {
-	graph_print(graph);
+	printf("Choose mode (int):\n1) Adjacency lists\n2) Graphviz\n");
+	int opt;
+	if(get_int(&opt)) return OUT_OF_MEMORY;
+
+	if (opt == 1) graph_print(graph);
+	else if (opt == 2) graph_make_graphviz(graph);
+	else return INVALID_INPUT;
+
 	return OK;
 }
 
@@ -231,6 +268,9 @@ void print_error(int e) {
 		case END_OF_FILE:
 			printf("[ERROR] EOF found.\n");
 			break;
+		case PATH_NOT_FOUND:
+			printf("[ERROR] Path not found.\n");
+			break;
 		default:
 			break;
 	}
@@ -238,13 +278,16 @@ void print_error(int e) {
 
 
 void start(Graph *graph) {
-	const char *menu[] = {"0. Quit",
+	const char *menu[] = {"0. Quit\n",
 					  	  "1. Add node",
 					      "2. Add edge",
 					      "3. Delete node",
-					      "4. Delete edge",
-					      "5. Show",
-					  	  "6. Random"};
+					      "4. Delete edge\n",
+					      "5. DFS",
+					      "6. Bellman-Ford",
+					      "7. Residual network\n",
+					      "8. Show",
+					  	  "9. Random"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
 	int (*dialog_functions[])(Graph*) = {NULL,
@@ -252,6 +295,9 @@ void start(Graph *graph) {
 										dialog_add_edge,
 										dialog_delete_node,
 										dialog_delete_edge,
+										dialog_dfs,
+										dialog_bf,
+										dialog_rn,
 										dialog_show,
 										dialog_random};
 

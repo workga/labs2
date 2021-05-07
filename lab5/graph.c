@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #include "graph.h"
 
-
+const int INF = INT_MAX;
 
 //--------/ Edge /-------------------------------------------------------------
 Edge* edge_new(int w, Node *near) {
@@ -12,6 +13,8 @@ Edge* edge_new(int w, Node *near) {
 	if (!edge) return NULL;
 
 	edge->w = w;
+	edge->c = w;
+	edge->f = 0;
 	edge->near = near;
 	edge->next = NULL;
 
@@ -40,7 +43,12 @@ Node* node_new(char *key, double x, double y) {
 	strcpy(node->key, key);
 	node->x = x;
 	node->y = y;
+
+	node->clr  = WHITE;
+	node->dist = 0;
+
 	node->list = NULL;
+	node->prev = NULL;
 	node->next = NULL;
 
 	return node;
@@ -116,6 +124,7 @@ Graph* graph_new() {
 	Graph *graph = (Graph*)calloc(1, sizeof(Graph));
 	if (!graph) return NULL;
 
+	graph->size = 0;
 	graph->list = NULL;
 
 	return graph;
@@ -154,6 +163,7 @@ int graph_insert_node(Graph *graph, char *key, double x, double y) {
 	else
 		graph->list = node;
 
+	graph->size++;
 	return OK;
 }
 
@@ -170,13 +180,15 @@ int graph_remove_node(Graph *graph, char *key) {
 				graph->list = cur->next;
 
 
+			// remove all incoming edges firstly
 			Node *cur_node = graph->list;
 			while (cur_node) {
 				node_remove_edge(cur_node, cur);
 				cur_node = cur_node->next;
 			}
+			// then remove node with all outcoming edges
 			node_delete(cur);
-
+			graph->size++;
 			return OK;
 		}
 
@@ -242,8 +254,57 @@ int graph_remove_edge(Graph *graph, char *key_1, char *key_2) {
 
 
 //--------/ Graph Algos /------------------------------------------------------
-void graph_dfs(Graph *graph, char *key_1, char *key_2) {
+int graph_dfs(Graph *graph, char *key_1, char *key_2) {
+	// init
+	Node *cur = graph->list;
+	Node *start = NULL;
+	while (cur) {
+		if (strcmp(cur->key, key_1) == 0)
+			start = cur;
+		cur->clr  = WHITE;
+		cur->prev = NULL;
+		cur = cur->next;
+	}
 
+	if (!start) return PATH_NOT_FOUND;
+
+	Node *u = graph_dfs_visit(start, key_2);
+	if (!u) return PATH_NOT_FOUND;
+
+	graph_dfs_print_path(u);
+	printf("\n");
+	return OK;
+}
+
+
+Node* graph_dfs_visit(Node* u, char *key_2) {
+	u->clr = BLACK;
+	if (DEBUG) printf("\"%s\"\n", u->key);
+
+	if (strcmp(u->key, key_2) == 0) return u;
+
+	Edge *cur_edge = u->list;
+	while (cur_edge) {
+		Node *v = cur_edge->near;
+
+		if (v->clr == WHITE) {
+			v->prev = u;
+
+			Node *res = graph_dfs_visit(v, key_2);
+			if (res) return res;
+		}
+
+		cur_edge = cur_edge->next;
+	}
+
+	return NULL;
+}
+
+
+void graph_dfs_print_path(Node *u) {
+	if (!u) return;
+	else graph_dfs_print_path(u->prev);
+	printf(" -> \"%s\"", u->key);
 }
 
 
@@ -282,7 +343,23 @@ void graph_print(Graph *graph) {
 
 
 void graph_make_graphviz(Graph *graph) {
+	printf("/----- DOT BEGIN -----/\n");
+	printf("digraph G {\n");
 
+	Node *cur_node = graph->list;
+	while (cur_node) {
+		Edge *cur_edge = cur_node->list;
+		while (cur_edge) {
+			printf("\"%s\" -> \"%s\";\n", cur_node->key, cur_edge->near->key);
+
+			cur_edge = cur_edge->next;
+		}
+
+		cur_node = cur_node->next;
+	}
+
+   	printf("}\n");
+	printf("/------ DOT END  -----/\n");
 }
 
 

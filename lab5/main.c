@@ -1,6 +1,8 @@
 #include "graph.h"
 #include "menu.h"
 
+const int DEBUG = 1;
+
 int main(int argc, const char** argv) {
 
 	Graph *graph = graph_new();
