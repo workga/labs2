@@ -194,8 +194,12 @@ int dialog_test(Node **tree) {
 
 int dialog_load(Node **tree) {
 	printf("[LOAD]\n");
-	printf("Not implemented yet\n");
-	//...
+	
+	if (tree_load(tree)) {
+		printf("[ERROR] Couldn't read the file.\n");
+		return 1;
+	}
+
 	return 0;
 }
 

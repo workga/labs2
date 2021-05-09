@@ -4,13 +4,13 @@
 const int DEBUG;
 
 typedef struct Info {
-	float flt;
-	char *str;
-	struct Info *next;
+	long int pos;
+
+	struct Info* next;
 } Info;
 
 typedef struct Node {
-	int key;
+	unsigned int key;
 	int h;
 	int len;
 	struct Info *info;
@@ -20,13 +20,13 @@ typedef struct Node {
 
 
 //--------/ Info /-------------------------------------------------------------
-Info* info_new(float flt, char *str);
+Info* info_new(long int pos);
 void  info_delete(Info *info);
 
 
 
 //--------/ Node /-------------------------------------------------------------
-Node* node_new(Node *parent, Node *left, Node *right, int key, Info *info);
+Node* node_new(Node *parent, Node *left, Node *right, unsigned int key, Info *info);
 void  node_delete(Node *node);
 Info* node_get_info(Node *node, int num);
 void  node_push_front(Node *node, Info *info);
@@ -50,25 +50,19 @@ Node* node_balance(Node *node);
 void  tree_delete(Node *tree);
 void  tree_remove_all(Node *tree);
 
-Node* tree_find(Node *node, int key);
+Node* tree_find(Node *node, unsigned int key);
 Node* tree_find_min(Node *node);
 Node* tree_find_next(Node *node);
-Node* tree_find_target_parent(Node *node, int key);
-const Info* tree_find_info(Node *node, int key, int num);
-const Info* tree_find_min_greater(Node *node, int key);
+Node* tree_find_target_parent(Node *node, unsigned int key);
+const Info* tree_find_info(Node *node, unsigned int key, int num);
+const Info* tree_find_min_greater(Node *node, unsigned int key);
 
-int   tree_insert(Node **tree, int key, float flt, char *str);
-int   tree_remove(Node **tree, int key);
+int   tree_insert(Node **tree, unsigned int key, long int pos);
+int   tree_remove(Node **tree, unsigned int key);
 
 
 
 //--------/ Tree Utils /-------------------------------------------------------------
-void  tree_print(Node *node);
-void  tree_print_range(Node *node, int key_min, int key_max);
 void  tree_draw(Node *node, int offset);
-void  tree_make_graphviz(Node *node, int first);
-
-int   tree_load(Node **tree);
-
 
 #endif

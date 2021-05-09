@@ -7,37 +7,25 @@
 
 
 //--------/ Info /-------------------------------------------------------------
-Info* info_new(float flt, char *str) {
-	if (!str) return NULL;
-
+Info* info_new(long int pos) {
 	Info *info = (Info*)calloc(1, sizeof(Info));
 	if (!info) return NULL;
 
-	info->str = (char*)calloc((int)strlen(str) + 1, sizeof(char));
-	if (!info->str) {
-		free(info);
-		return NULL;
-	}
-
-	//-------------------------------------------
-
-	info->flt = flt;
-	strcpy(info->str, str);
+	info->pos = pos;
+	info->next = NULL;
 
 	return info;
 }
 
 
 void info_delete(Info *info) {
-	free(info->str);
 	free(info);
 }
 
 
 
 //--------/ Node /-------------------------------------------------------------
-Node* node_new(Node *parent, Node *left, Node *right, int key, Info *info) {
-	//if (!key) return NULL;
+Node* node_new(Node *parent, Node *left, Node *right, unsigned int key, Info *info) {
 	if (!info) return NULL;
 
 	Node *node = (Node*)calloc(1, sizeof(Node));
@@ -223,7 +211,7 @@ void tree_delete(Node *tree) {
 }
 
 
-Node* tree_find(Node *node, int key) {
+Node* tree_find(Node *node, unsigned int key) {
 	if (!node) return NULL;
 
 	while (node) {
@@ -262,7 +250,7 @@ Node* tree_find_next(Node *node) {
 }
 
 
-Node* tree_find_target_parent(Node *node, int key) {
+Node* tree_find_target_parent(Node *node, unsigned int key) {
 	Node *parent = NULL;
 	Node *cur    = node;
 
@@ -281,7 +269,7 @@ Node* tree_find_target_parent(Node *node, int key) {
 }
 
 
-const Info* tree_find_info(Node *node, int key, int num) {
+const Info* tree_find_info(Node *node, unsigned int key, int num) {
 	Node *found_node = tree_find(node, key);
 	if (!found_node) return NULL;
 
@@ -290,7 +278,7 @@ const Info* tree_find_info(Node *node, int key, int num) {
 }
 
 
-const Info* tree_find_min_greater(Node *node, int key) {
+const Info* tree_find_min_greater(Node *node, unsigned int key) {
 	if (!node) return NULL;
 
 	Node *cur = node;
@@ -320,14 +308,14 @@ const Info* tree_find_min_greater(Node *node, int key) {
 }
 
 
-int tree_insert(Node **tree, int key, float flt, char *str) {
-	Info *info = info_new(flt, str);
+int tree_insert(Node **tree, unsigned int key, long int pos) {
+	Info *info = info_new(pos);
 	if (!info) return 1;
 
 	// if key exists
 	Node* found_node = tree_find(*tree, key);
 	if (found_node) {
-		node_push_front(found_node, info);
+		//node_push_front(found_node, info);
 		return 0;
 	}
 
@@ -380,7 +368,7 @@ int tree_insert(Node **tree, int key, float flt, char *str) {
 }
 
 
-int tree_remove(Node **tree, int key) {
+int tree_remove(Node **tree, unsigned int key) {
 	Node* found_node = tree_find(*tree, key);
 	if (!found_node) return 1;
 
@@ -488,25 +476,6 @@ int tree_remove(Node **tree, int key) {
 
 
 //--------/ Tree Utils /-------------------------------------------------------------
-void tree_print(Node *node) {
-    if (!node) return;
-	tree_print(node->right);
-	printf("(k=%d, r=%d : [%4.2f, \"%s\"])\n", node->key, node->len, node->info->flt, node->info->str);
-	tree_print(node->left);
-}
-
-void tree_print_range(Node *node, int key_min, int key_max) {
-    if (!node) return;
-
-    if (node->key < key_max) 
-    	tree_print_range(node->right, key_min, key_max);
-	if ((node->key <= key_max) && (node->key >= key_min))
-		printf("(k=%d, r=%d : [%4.2f, \"%s\"])\n", node->key, node->len, node->info->flt, node->info->str);
-	if (node->key > key_min)
-    	tree_print_range(node->left, key_min, key_max);
-}
-
-
 void tree_draw(Node *node, int offset) {
 	if (!node) return;
 	if (offset == 0) printf("\n");
@@ -523,88 +492,9 @@ void tree_draw(Node *node, int offset) {
     if (side < 0) c = '\\';
     else if (side > 0) c = '/';
     else c = ' ';
-    if (node->info) printf("%c (k=%d, r=%d : [%4.2f, \"%s\"])\n", c, node->key, node->len, node->info->flt, node->info->str);
+    if (node->info) printf("%c (k=%d, r=%d : [%ld])\n", c, node->key, node->len, node->info->pos);
     else printf("null info\n");
 
 
     tree_draw(node->left, offset + 1);
-}
-
-
-void tree_make_graphviz(Node *node, int first) {
-	if(!node) return;
-
-	if (first) {
-		printf("/----- DOT BEGIN -----/\n");
-		printf("digraph G {\n");
-	}
-	//-------------------------------------------
-
-
-	//----/ left subtree /-------------
-    if (node->left) tree_make_graphviz(node->left, 0);
-    else {
-    	printf("\"(k=%d, r=%d : [%4.2f, \'%s\'])\" -> \"(k=%d, r=%d : [%4.2f, \'%s\'])_left\"\n",
-    			node->key, node->len, node->info->flt, node->info->str,
-    			node->key, node->len, node->info->flt, node->info->str);
-    	printf("\"(k=%d, r=%d : [%4.2f, \'%s\'])_left\"[shape=point]\n",
-    			node->key, node->len, node->info->flt, node->info->str);
-   	}
-
-
-   	//----/ current node /-------------
-    if (node->parent) {
-	    printf("\"(k=%d, r=%d : [%4.2f, \'%s\'])\" -> \"(k=%d, r=%d : [%4.2f, \'%s\'])\"\n",
-	    	   node->parent->key, node->parent->len, node->parent->info->flt, node->parent->info->str,
-	    	   node->key, node->len, node->info->flt, node->info->str);
-    }
-
-
-	//----/ right subtree /-------------
-    if (node->right) tree_make_graphviz(node->right, 0);
-    else {
-    	printf("\"(k=%d, r=%d : [%4.2f, \'%s\'])\" -> \"(k=%d, r=%d : [%4.2f, \'%s\'])_right\"\n",
-    			node->key, node->len, node->info->flt, node->info->str,
-    			node->key, node->len, node->info->flt, node->info->str);
-    	printf("\"(k=%d, r=%d : [%4.2f, \'%s\'])_right\"[shape=point]\n",
-    			node->key, node->len, node->info->flt, node->info->str);
-   	}
-
-
-   	//-------------------------------------------
-	if (first) {
-		printf("}\n");
-		printf("/------ DOT END  -----/\n");
-	}
-
-}
-
-
-int tree_load(Node **tree) {
-	FILE *fp;
-
-	int key;
-	float flt;
-	char str[10]; //max str len
-
-	if (!(fp = fopen("input.txt", "r"))) return 1;
-
-	tree_delete(*tree);
-	*tree = NULL;
-
-	while (fscanf(fp, "%d\n", &key)) {
-		if (fscanf(fp, "%f\n", &flt) <= 0) {
-			break;
-		}
-
-		if (!fgets(str, sizeof(str), fp)) {
-			break;
-		}
-		
-		if (str[strlen(str) - 1] == '\n')
-			str[strlen(str) - 1] = '\0';
-		tree_insert(tree, key, flt, str);
-	}
-
-	return 0;
 }
