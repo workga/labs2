@@ -58,11 +58,13 @@ int main(int argc, const char** argv) {
 
 	tree_draw(tree, 0);
 
-	printf("Enter uint to find\n");
+	printf("Enter uint to find or Ctrl+D to exit\n");
 	while(!get_uint(&key)) {
 		Info *info = tree_find_info(tree, key, 1);
 		if (info) printf("Found pos: %ld\n", info->pos);
 		else printf("Not found\n");
+		free(info);
+		printf("Enter uint to find or Ctrl+D to exit\n");
 	}
 
 	tree_delete(tree);
