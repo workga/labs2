@@ -193,7 +193,22 @@ int dialog_dfs(Graph *graph) {
 
 
 int dialog_bf(Graph *graph) {
+	printf("Enter key_1 (string):\n");
+	char *key_1;
+	if(!(key_1 = get_str())) return END_OF_FILE;
 
+	printf("Enter key_2 (string):\n");
+	char *key_2;
+	if(!(key_2 = get_str())) {
+		free(key_2);
+		return END_OF_FILE;
+	}
+
+	int e = graph_bf(graph, key_1, key_2);
+
+	free(key_1);
+	free(key_2);
+	return e;
 }
 
 

@@ -15,6 +15,7 @@ Edge* edge_new(int w, Node *near) {
 	edge->w = w;
 	edge->c = w;
 	edge->f = 0;
+
 	edge->near = near;
 	edge->next = NULL;
 
@@ -44,11 +45,9 @@ Node* node_new(char *key, double x, double y) {
 	node->x = x;
 	node->y = y;
 
-	node->clr  = WHITE;
-	node->dist = 0;
+	node->i = 0;
 
 	node->list = NULL;
-	node->prev = NULL;
 	node->next = NULL;
 
 	return node;
@@ -253,32 +252,44 @@ int graph_remove_edge(Graph *graph, char *key_1, char *key_2) {
 
 
 
-//--------/ Graph Algos /------------------------------------------------------
-int graph_dfs(Graph *graph, char *key_1, char *key_2) {
-	// init
+Node* graph_find(Graph *graph, char *key) {
 	Node *cur = graph->list;
-	Node *start = NULL;
 	while (cur) {
-		if (strcmp(cur->key, key_1) == 0)
-			start = cur;
-		cur->clr  = WHITE;
-		cur->prev = NULL;
+		if (strcmp(cur->key, key) == 0)
+			break;
 		cur = cur->next;
 	}
 
-	if (!start) return PATH_NOT_FOUND;
+	return cur;
+}
 
-	Node *u = graph_dfs_visit(start, key_2);
-	if (!u) return PATH_NOT_FOUND;
 
-	graph_dfs_print_path(u);
+
+//--------/ Graph Algos /------------------------------------------------------
+int graph_dfs(Graph *graph, char *key_1, char *key_2) {
+	// init
+	graph_numerate(graph);
+	int *colors  = (int*)calloc(graph->size, sizeof(int));
+	Node **prevs = (Node**)calloc(graph->size, sizeof(Node*));
+
+
+	Node *cur = graph_find(graph, key_1);
+	if (!cur) return KEY_NOT_FOUND;
+
+	Node *res = graph_dfs_visit(cur, key_2, colors, prevs);
+	graph_print_path(res, prevs);
 	printf("\n");
+
+	free(colors);
+	free(prevs);
+
+	if (!res) return PATH_NOT_FOUND;
 	return OK;
 }
 
 
-Node* graph_dfs_visit(Node* u, char *key_2) {
-	u->clr = BLACK;
+Node* graph_dfs_visit(Node* u, char *key_2, int *colors, Node **prevs) {
+	colors[u->i] = BLACK;
 	if (DEBUG) printf("\"%s\"\n", u->key);
 
 	if (strcmp(u->key, key_2) == 0) return u;
@@ -287,10 +298,10 @@ Node* graph_dfs_visit(Node* u, char *key_2) {
 	while (cur_edge) {
 		Node *v = cur_edge->near;
 
-		if (v->clr == WHITE) {
-			v->prev = u;
+		if (colors[v->i] == WHITE) {
+			prevs[v->i] = u;
 
-			Node *res = graph_dfs_visit(v, key_2);
+			Node *res = graph_dfs_visit(v, key_2, colors, prevs);
 			if (res) return res;
 		}
 
@@ -301,15 +312,74 @@ Node* graph_dfs_visit(Node* u, char *key_2) {
 }
 
 
-void graph_dfs_print_path(Node *u) {
-	if (!u) return;
-	else graph_dfs_print_path(u->prev);
-	printf(" -> \"%s\"", u->key);
-}
+
+int graph_bf(Graph *graph, char *key_1, char *key_2) {
+	// init
+	graph_numerate(graph);
+	int *dists  = (int*)calloc(graph->size, sizeof(int));
+	Node **prevs = (Node**)calloc(graph->size, sizeof(Node*));
+
+	for (int i = 0; i < graph->size; i++) {
+		dists[i] = INF;
+		prevs[i] = NULL;
+	}
+
+	Node *start = graph_find(graph, key_1);
+	if (!start) return KEY_NOT_FOUND;
+
+	Node *finish = graph_find(graph, key_2);
+	if (!finish) return KEY_NOT_FOUND;
+
+	dists[start->i] = 0;
+
+	// from q to V - 1  - ???
+	for (int i = 1; i <= graph->size; i++) {
+		Node *cur_node = graph->list;
+		while (cur_node) {
+			int ui = cur_node->i;
+
+			Edge *cur_edge = cur_node->list;
+			while (cur_edge) {
+				int vi = cur_edge->near->i;
+				int w  = cur_edge->w;
+
+				if (dists[vi] > dists[ui] + w) {
+					dists[vi] = dists[ui] + w;
+					prevs[vi] = dists[ui];
+				}
+
+				cur_edge = cur_edge->next;
+			}
+
+			cur_node = cur_node->next;
+		}
+	}
 
 
-void graph_bf(Graph *graph, char *key_1, char *key_2) {
+	// check negative loop
+	Node *cur_node = graph->list;
+	while (cur_node) {
+		int ui = cur_node->i;
 
+		Edge *cur_edge = cur_node->list;
+		while (cur_edge) {
+			int vi = cur_edge->near->i;
+			int w  = cur_edge->w;
+
+			if (dists[vi] > dists[ui] + w) {
+				return NEGATIVE_LOOP_FOUND;
+			}
+
+			cur_edge = cur_edge->next;
+		}
+
+		cur_node = cur_node->next;
+	}
+
+	graph_print_path(finish, prevs);
+
+	if (prevs[finish->i] == INF) return PATH_NOT_FOUND;
+	return OK;
 }
 
 
@@ -317,6 +387,26 @@ Graph* graph_rn(Graph *graph, char *key_1, char *key_2) {
 
 }
 
+
+
+
+void graph_numerate(Graph *graph) {
+	Node *cur = graph->list;
+	int i = 0;
+
+	while (cur) {
+		cur->i = i;
+		i++;
+		cur = cur->next;
+	}
+}
+
+
+void graph_print_path(Node *node, Node **prevs) {
+	if (!node) return;
+	else graph_print_path(prevs[node->i], prevs);
+	printf(" -> \"%s\"", node->key);
+}
 
 //auxiliary functions
 
@@ -349,6 +439,8 @@ void graph_make_graphviz(Graph *graph) {
 	Node *cur_node = graph->list;
 	while (cur_node) {
 		Edge *cur_edge = cur_node->list;
+		printf("\"%s\";\n", cur_node->key);
+
 		while (cur_edge) {
 			printf("\"%s\" -> \"%s\";\n", cur_node->key, cur_edge->near->key);
 

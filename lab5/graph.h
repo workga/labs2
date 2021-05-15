@@ -15,12 +15,13 @@ enum Error {
 	EDGE_NOT_FOUND,
 	INVALID_INPUT,
 	END_OF_FILE,
-	PATH_NOT_FOUND
+	PATH_NOT_FOUND,
+	NEGATIVE_LOOP_FOUND
 };
 
 
 enum Color {
-	WHITE,
+	WHITE, // 0
 	GREY,
 	BLACK
 };
@@ -42,15 +43,13 @@ typedef struct Node {
 	char *key;
 	double x, y;
 
-	int clr;
-	int dist;
+	int i;
 
 	struct Edge *list;
-	struct Node *prev; // prev in traversal or algo
 	struct Node *next; // next in graph's list
 } Node;
 
-typedef struct Graph { // V and E?
+typedef struct Graph {
 	int size;
 	struct Node *list;
 } Graph;
@@ -78,17 +77,19 @@ int    graph_remove_node(Graph *graph, char *key);
 int    graph_insert_edge(Graph *graph, char *key_1, char *key_2, int w);
 int    graph_remove_edge(Graph *graph, char *key_1, char *key_2);
 
+Node*  graph_find(Graph *graph, char *key);
 
 
 //--------/ Graph Algos /------------------------------------------------------
 int    graph_dfs(Graph *graph, char *key_1, char *key_2); // Depth-First Search
-Node*  graph_dfs_visit(Node *u, char *key_2);
-void   graph_dfs_print_path(Node *u);
+Node*  graph_dfs_visit(Node *u, char *key_2, int *colors, Node **prevs);
 
-void   graph_bf(Graph *graph, char *key_1, char *key_2); // The Bellman–Ford algorithm
+int    graph_bf(Graph *graph, char *key_1, char *key_2); // The Bellman–Ford algorithm
 Graph* graph_rn(Graph *graph, char *key_1, char *key_2); // Residual network
 
 
+void   graph_numerate(Graph *graph);
+void   graph_print_path(Node *node, Node **prevs);
 // int edge_capacity();
 // int edge_flow();
 //auxiliary functions
