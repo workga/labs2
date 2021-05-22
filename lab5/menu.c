@@ -130,8 +130,21 @@ int dialog_add_edge(Graph *graph) {
 		return OUT_OF_MEMORY;
 	}
 
+	printf("Enter capacity (int, > 0):\n");
+	int c;
+	if(get_int(&c)) {
+		free(key_1);
+		free(key_2);
+		return OUT_OF_MEMORY;
+	}
+	if (c <= 0) {
+		free(key_1);
+		free(key_2);
+		return INVALID_INPUT;
+	}
 
-	int e = graph_insert_edge(graph, key_1, key_2, w);
+
+	int e = graph_insert_edge(graph, key_1, key_2, w, c);
 
 	free(key_1);
 	free(key_2);
@@ -213,7 +226,22 @@ int dialog_bf(Graph *graph) {
 
 
 int dialog_rn(Graph *graph) {
+	printf("Enter key_1 (string):\n");
+	char *key_1;
+	if(!(key_1 = get_str())) return END_OF_FILE;
 
+	printf("Enter key_2 (string):\n");
+	char *key_2;
+	if(!(key_2 = get_str())) {
+		free(key_2);
+		return END_OF_FILE;
+	}
+
+	int e = graph_rn_max_flow(graph, key_1, key_2);
+
+	free(key_1);
+	free(key_2);
+	return e;
 }
 
 
@@ -231,8 +259,13 @@ int dialog_show(Graph *graph) {
 
 
 int dialog_random(Graph *graph) {
-	printf("Not implemented yet");
-	return OK;
+	printf("Enter number of nodes: \n");
+	int size;
+	if(get_int(&size)) return OUT_OF_MEMORY;
+
+
+	int e = graph_random(graph, size);
+	return e;
 }
 
 
@@ -285,6 +318,9 @@ void print_error(int e) {
 			break;
 		case PATH_NOT_FOUND:
 			printf("[ERROR] Path not found.\n");
+			break;
+		case NEGATIVE_LOOP_FOUND:
+			printf("[ERROR] Nagative loop found.\n");
 			break;
 		default:
 			break;
