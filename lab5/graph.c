@@ -206,7 +206,7 @@ int graph_remove_node(Graph *graph, char *key) {
 			}
 			// then remove node with all outcoming edges
 			node_delete(cur);
-			graph->size++;
+			graph->size--;
 			return OK;
 		}
 
@@ -750,10 +750,12 @@ Graph* graph_load() {
 	Graph *graph = graph_new();
 	int size;
 	fread(&size, sizeof(int), 1, fp);
+    //printf("(graph) size: %d\n", size);
 	for (int i = 0; i < size; i++) {
 		int len;
 		fread(&len, sizeof(int), 1, fp);
 
+		//printf("(nodes) key len: %d\n", len);
 		char *key = (char*)calloc(len + 1, sizeof(char));
 		fread(key, sizeof(char), len, fp);
 		key[len] = '\0';
@@ -761,9 +763,7 @@ Graph* graph_load() {
 		double x;
 		double y;
 		fread(&x, sizeof(double), 1, fp);
-		printf("%d", i);
 		fread(&y, sizeof(double), 1, fp);
-        printf(" %d\n", i);
 
 		graph_insert_node(graph, key, x, y);
 		free(key);
@@ -785,6 +785,7 @@ Graph* graph_load() {
 			int len;
 			fread(&len, sizeof(int), 1, fp);
 
+			//printf("(edges) key len: %d\n", len);
 			char *key = (char*)calloc(len + 1, sizeof(char));
 			fread(key, sizeof(char), len, fp);
 			key[len] = '\0';
@@ -812,9 +813,11 @@ int graph_save(Graph *graph) {
 
 
 	fwrite(&(graph->size), sizeof(int), 1, fp);
+	//printf("(graph) size: %d\n", graph->size);
 	Node *cur = graph->list;
 	while (cur) {
 		int len = strlen(cur->key);
+		//printf("(nodes) key len: %d\n", len);
 		fwrite(&len, sizeof(int), 1, fp);
 		fwrite(cur->key, sizeof(char), len, fp);
 		fwrite(&(cur->x), sizeof(double), 1, fp);
@@ -826,12 +829,14 @@ int graph_save(Graph *graph) {
 	cur = graph->list;
 	while (cur) {
 		fwrite(&(cur->deg), sizeof(int), 1, fp);
+		//printf("node deg: %d\n", cur->deg);
 
 		Edge *edge = cur->list;
 		while (edge) {
 			fwrite(&(edge->w), sizeof(int), 1, fp); // w
 			fwrite(&(edge->c), sizeof(int), 1, fp); // c
 			int len = strlen(edge->near->key);
+			//printf("(edges) key len: %d\n", len);
 			fwrite(&len, sizeof(int), 1, fp);
 			fwrite(edge->near->key, sizeof(char), len, fp);
 
@@ -932,8 +937,7 @@ Node* get_node_by_index(Graph *graph, int index) {
 }
 
 
-char* random_str(int len)
-{
+char* random_str(int len) {
     char *str = (char*)calloc(len + 1, sizeof(char));
     if (!str) return NULL;
 

@@ -28,6 +28,8 @@ int main(int argc, const char** argv) {
 		graph_insert_edge(graph, "2", "t", 9, 20);
 		graph_insert_edge(graph, "4", "t", 10, 4);
 
+		graph_remove_node(graph, "2");
+
 	}
 
 	start(graph);
