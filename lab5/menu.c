@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "graph.h"
+#include "tasks.h"
 #include "menu.h"
 
 
@@ -263,8 +264,43 @@ int dialog_random(Graph *graph) {
 	int size;
 	if(get_int(&size)) return OUT_OF_MEMORY;
 
+	printf("Enter the fill percentage (percent of edges, 0 - 100): \n");
+	int perc;
+	if(get_int(&perc)) return OUT_OF_MEMORY;
 
-	int e = graph_random(graph, size);
+	if ((perc < 0) || (perc > 100)) return INVALID_INPUT;
+
+	int e = graph_random(graph, size, perc);
+	return e;
+}
+
+
+int dialog_test(Graph *graph) {
+	printf("Enter number of tests (graphs): \n");
+	int ntests;
+	if(get_int(&ntests)) return OUT_OF_MEMORY;
+
+	printf("Enter number of iterations (for each graph): \n");
+	int niters;
+	if(get_int(&niters)) return OUT_OF_MEMORY;
+
+	printf("Enter number of nodes: \n");
+	int size;
+	if(get_int(&size)) return OUT_OF_MEMORY;
+
+	printf("Enter the fill percentage (percent of edges, 0 - 100): \n");
+	int perc;
+	if(get_int(&perc)) return OUT_OF_MEMORY;
+
+	if ((perc < 0) || (perc > 100)) return INVALID_INPUT;
+
+	int e = graph_test(size, perc, ntests, niters);
+	return e;
+}
+
+
+int dialog_load_map(Graph *graph) {
+	int e =	load_map(graph);
 	return e;
 }
 
@@ -322,6 +358,8 @@ void print_error(int e) {
 		case NEGATIVE_LOOP_FOUND:
 			printf("[ERROR] Nagative loop found.\n");
 			break;
+		case COULD_NOT_READ_FILE:
+			printf("[ERROR] Couldn't read the file.\n");
 		default:
 			break;
 	}
@@ -338,7 +376,9 @@ void start(Graph *graph) {
 					      "6. Bellman-Ford",
 					      "7. Residual network\n",
 					      "8. Show",
-					  	  "9. Random"};
+					  	  "9. Random",
+					  	  "10. Test\n",
+					  	  "11. Load map"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
 	int (*dialog_functions[])(Graph*) = {NULL,
@@ -350,7 +390,9 @@ void start(Graph *graph) {
 										dialog_bf,
 										dialog_rn,
 										dialog_show,
-										dialog_random};
+										dialog_random,
+										dialog_test,
+										dialog_load_map};
 
 	int opt;
 	while((opt = dialog(menu, menu_size))) {

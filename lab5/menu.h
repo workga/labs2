@@ -22,6 +22,9 @@ int dialog_rn(Graph *graph);
 
 int dialog_show(Graph *graph);
 int dialog_random(Graph *graph);
+int dialog_test(Graph *graph);
+
+int dialog_load_map(Graph *graph);
 
 int  dialog(const char *menu[], const int menu_size);
 void print_error(int e);

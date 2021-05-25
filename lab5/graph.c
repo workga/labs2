@@ -101,7 +101,7 @@ int node_push_edge(Node *node, Node *near, int w, int c, int f) {
 
 	node->deg++;
 
-	return 0;
+	return OK;
 }
 
 
@@ -383,36 +383,7 @@ int graph_bf(Graph *graph, char *key_1, char *key_2) {
 	}
 
 
-	// check negative loop:
-	// a) only for edges in path of prevs
-	// Node *cur = finish;
-	// while (prevs[cur->i]) {
-	// 	Node *u = prevs[cur->i];
-	// 	Node *v = cur;
-	// 	int w;
-	// 	Edge *cur_edge = u->list;
-	// 	while (cur_edge) {
-	// 		if (cur_edge->near == v) {
-	// 			w = cur_edge->w;
-	// 			break;
-	// 		}
-	// 		cur_edge = cur_edge->next;
-	// 	}
-
-	// 	int ui = u->i;
-	// 	int vi = v->i;
-
-	// 	if ((dists[ui] != INF) && (dists[vi] > dists[ui] + w)) {
-	// 			free(dists);
-	// 			free(prevs);
-	// 			return NEGATIVE_LOOP_FOUND;
-	// 	}
-
-	// 	cur = prevs[cur->i];
-	// }
-
-
-	// b) original solution
+	// check negative loop
 	Node *cur_node = graph->list;
 	while (cur_node) {
 		int ui = cur_node->i;
@@ -718,14 +689,21 @@ void graph_print(Graph *graph) {
 
 void graph_make_graphviz(Graph *graph) {
 	printf("/----- DOT BEGIN -----/\n");
+	FILE *fp = fopen("graphviz.txt", "w");
+	if (!fp) return;
+
+	fprintf(fp, "digraph G {\n");
 	printf("digraph G {\n");
 
 	Node *cur_node = graph->list;
 	while (cur_node) {
 		Edge *cur_edge = cur_node->list;
+		fprintf(fp, "\"%s\";\n", cur_node->key);
 		printf("\"%s\";\n", cur_node->key);
 
 		while (cur_edge) {
+			fprintf(fp, "\"%s\" -> \"%s\" [label = \"%d, %d/%d\"];\n",
+				    cur_node->key, cur_edge->near->key, cur_edge->w, cur_edge->f, cur_edge->c);
 			printf("\"%s\" -> \"%s\" [label = \"%d, %d/%d\"];\n",
 				   cur_node->key, cur_edge->near->key, cur_edge->w, cur_edge->f, cur_edge->c);
 
@@ -735,7 +713,9 @@ void graph_make_graphviz(Graph *graph) {
 		cur_node = cur_node->next;
 	}
 
+   	fprintf(fp, "}\n");
    	printf("}\n");
+   	fclose(fp);
 	printf("/------ DOT END  -----/\n");
 }
 
@@ -851,34 +831,41 @@ int graph_save(Graph *graph) {
 }
 
 
-int graph_random(Graph *graph, int size) {
+int graph_random(Graph *graph, int size, int perc) {
 	graph_remove_all(graph);
 
+	int len = calculate_len(size);
 	int e;
 	srand(time(NULL));
+	int max_attempts = 0;
 	for (int i = 0; i < size; i++) {
 		int x;
 		int y;
-		int len;
 		char *key = NULL;
+		
+		int attempts = 0;
 		do {
 			free(key);
 			x = rand() % RAND_MAX_XY;
 			y = rand() % RAND_MAX_XY;
-			len = calculate_len(size);
 			key = random_str(len);
+
+			attempts++;
 		} while ((e = graph_insert_node(graph, key, x, y)) != OK &&
 				 (e != OUT_OF_MEMORY));
 		free(key);
-
 		if (e == OUT_OF_MEMORY) {
 			graph_remove_all(graph);
 			return OUT_OF_MEMORY; // here clear all graph
 		}
+
+		max_attempts = (max_attempts > attempts) ? max_attempts : attempts;
 	}
+	//if (DEBUG) printf("Max node insertion attempts: %d\n", max_attempts);
 
-
-	int count = calculate_edges_count(size);
+	max_attempts = 0;
+	int count = calculate_edges_count(size, perc);
+	// if (DEBUG) printf("Edges count: %d\n", count);
 	for (int i = 0; i < count; i++) {
 		int ui;
 		int vi;
@@ -887,6 +874,7 @@ int graph_random(Graph *graph, int size) {
 		int w;
 		int c;
 
+		int attempts = 0;
 		do {
 			ui = rand() % size;
 			vi = rand() % size;
@@ -896,13 +884,18 @@ int graph_random(Graph *graph, int size) {
 
 			w = rand() % (2*RAND_MAX_W + 1) - RAND_MAX_W;
 			c = rand() % (RAND_MAX_C + 1);
+
+			attempts++;
 		} while ((e = graph_insert_edge(graph, key_1, key_2, w, c)) != OK &&
 				 (e != OUT_OF_MEMORY));
 		if (e == OUT_OF_MEMORY) {
 			graph_remove_all(graph);
 			return OUT_OF_MEMORY;
 		}
+
+		max_attempts = (max_attempts > attempts) ? max_attempts : attempts;
 	}
+	//if (DEBUG) printf("Max edge insertion attempts: %d\n", max_attempts);
 
 	return OK;
 }
@@ -914,12 +907,12 @@ int calculate_len(int size) {
 }
 
 
-int calculate_edges_count(int size) {
-	int whole_count = (int)(size*(size - 1)*0.5);
-	int min_count = (int)(whole_count*RAND_MIN_EDGES);
-	int max_count = (int)(whole_count*RAND_MAX_EDGES);
-	int count = rand() % (max_count - min_count) + min_count;
-	return count;
+int calculate_edges_count(int size, int perc) {
+	if (perc == 0) return 0;
+
+	int all = (size*(size - 1));
+	if (perc == 100) return all;
+	return (int)all*(perc/100.);
 }
 
 
@@ -954,14 +947,136 @@ char* random_str(int len) {
     return str;
 }
 
-int edge_weight_by_nodes(Node *u, Node *v) {
-	if (!u) return MINUS_INF;
+//--------/ Extra Task 2 /-----------------------------------------------------
 
-	Edge *cur_edge = u->list;
-	while (cur_edge) {
-		if (cur_edge->near == v) return cur_edge->w;
-		cur_edge = cur_edge->next;
-	}
 
-	return INF;
+//--------/ Graph Tests /------------------------------------------------------
+int graph_test(int size, int perc, int ntests, int niters) {
+    srand(time(NULL));
+	int len = calculate_len(size) + 1;
+	int e;
+	
+	double g_t_node_insert = 0;
+    double g_t_node_remove = 0;
+    double g_t_edge_insert = 0;
+    double g_t_edge_remove = 0;
+
+    for (int i = 0; i < ntests; i++) {
+	    double t_node_insert = 0;
+	    double t_node_remove = 0;
+	    double t_edge_insert = 0;
+	    double t_edge_remove = 0;
+
+		Graph *graph = graph_new();
+		graph_random(graph, size, perc);
+
+		for (int j = 0; j < niters; j++) {
+			clock_t ts;
+			clock_t tf;
+
+
+			// insert node
+			int x = rand() % RAND_MAX_XY;
+			int y = rand() % RAND_MAX_XY;
+			char *key = random_str(len);
+
+	        ts = clock();
+			e = graph_insert_node(graph, key, x, y);
+			tf = clock();
+			free(key);
+
+	    	t_node_insert += (double)(tf - ts)/CLOCKS_PER_SEC;
+
+
+
+	    	// remove node
+			int ui = rand() % size;
+			key = get_node_by_index(graph, ui)->key;
+
+			ts = clock();
+			e = graph_remove_node(graph, key);
+			tf = clock();
+
+			t_node_remove += (double)(tf - ts)/CLOCKS_PER_SEC;
+
+
+
+			// insert edge
+			int w = rand() % (2*RAND_MAX_W + 1) - RAND_MAX_W;
+			int c = rand() % (RAND_MAX_C + 1);
+			do {
+				ui = rand() % size;
+				int vi;
+				do {
+					vi = rand() % size;
+				} while (vi == ui);
+				char *key_1 = get_node_by_index(graph, ui)->key;
+				char *key_2 = get_node_by_index(graph, vi)->key;
+
+				ts = clock();
+				e = graph_insert_edge(graph, key_1, key_2, w, c);
+				tf = clock();				
+			} while (e != OK);
+
+			t_edge_insert += (double)(tf - ts)/CLOCKS_PER_SEC;
+
+
+
+			// remove edge
+			Node *cur;
+			do {
+				ui = rand() % size;
+				cur = get_node_by_index(graph, ui);
+			} while (cur->deg == 0);
+			
+			char* key_1 = cur->key;
+
+			int vj = rand() % cur->deg;
+			Edge *cur_edge = cur->list;
+			for (int l = 1; l < vj; l++) {
+				cur_edge = cur_edge->next;
+			}
+			char *key_2 = cur_edge->near->key;
+
+			ts = clock();
+			e = graph_remove_edge(graph, key_1, key_2);
+			tf = clock();
+
+			t_edge_remove += (double)(tf - ts)/CLOCKS_PER_SEC;
+		}
+
+		graph_delete(graph);
+
+		t_node_insert /= niters;
+	    t_node_remove /= niters;
+	    t_edge_insert /= niters;
+	    t_edge_remove /= niters;
+
+	    g_t_node_insert += t_node_insert;
+    	g_t_node_remove += t_node_remove;
+    	g_t_edge_insert += t_edge_insert;
+    	g_t_edge_remove += t_edge_remove;
+    }
+
+    g_t_node_insert /= ntests;
+    g_t_node_remove /= ntests;
+    g_t_edge_insert /= ntests;
+    g_t_edge_remove /= ntests;
+
+
+    // printf("%d\t%d\t%.10f\t%.10f\t%.10f\t%.10f\n", perc, size,
+    //    	   g_t_node_insert,
+    // 	   g_t_node_remove,
+    // 	   g_t_edge_insert,
+    // 	   g_t_edge_remove);
+    printf("[TEST] Graph size:\t%d\nFill percentage:\t%d\n\n", size, perc);
+
+    printf("Type:\tnode insert\nAverage time:\t%.10f\n\n", g_t_node_insert);
+	printf("Type:\tnode remove\nAverage time:\t%.10f\n\n", g_t_node_remove);
+	printf("Type:\tedge insert\nAverage time:\t%.10f\n\n", g_t_edge_insert);
+	printf("Type:\tedge remove\nAverage time:\t%.10f\n\n", g_t_edge_remove);
+
+    return OK;
 }
+
+

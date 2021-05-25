@@ -6,31 +6,8 @@ const int DEBUG = 1;
 int main(int argc, const char** argv) {
 
 	Graph *graph = graph_load();
-	if (!graph) {
-        graph = graph_new();
+	if (!graph) graph = graph_new();
 
-		// test 3
-		graph_insert_node(graph, "s", 6, 3);
-		graph_insert_node(graph, "1", 6, 3);
-		graph_insert_node(graph, "2", 6, 3);
-		graph_insert_node(graph, "3", 6, 3);
-		graph_insert_node(graph, "4", 6, 3);
-		graph_insert_node(graph, "t", 6, 3);
-
-		graph_insert_edge(graph, "s", "1", 1, 16);
-	    graph_insert_edge(graph, "s", "3", 2, 13);
-		graph_insert_edge(graph, "1", "3", 3, 10);
-		graph_insert_edge(graph, "3", "1", 4, 4);
-		graph_insert_edge(graph, "1", "2", 5, 12);
-		graph_insert_edge(graph, "2", "3", 6, 9);
-		graph_insert_edge(graph, "3", "4", 7, 14);
-		graph_insert_edge(graph, "4", "2", 8, 7);
-		graph_insert_edge(graph, "2", "t", 9, 20);
-		graph_insert_edge(graph, "4", "t", 10, 4);
-
-		graph_remove_node(graph, "2");
-
-	}
 
 	start(graph);
 
@@ -39,6 +16,24 @@ int main(int argc, const char** argv) {
 
 	return 0;
 }
+
+
+	// tests
+
+	// int perc = 50;
+	// for (int size = 100; size <= 1000; size += 100) {
+	// 	graph_test(size, perc, 1, 10);
+	// }
+
+	// perc = 10;
+	// for (int size = 100; size <= 1000; size += 100) {
+	// 	graph_test(size, perc, 1, 10);
+	// }
+
+	// perc = 90;
+	// for (int size = 100; size <= 1000; size += 100) {
+	// 	graph_test(size, perc, 1, 10);
+	// }
 
 	// test 1
 	// graph_insert_node(graph, "1", 11, 11);
@@ -76,3 +71,25 @@ int main(int argc, const char** argv) {
 	// //graph_insert_edge(graph, "4", "6", 1, 1);
 	// graph_insert_edge(graph, "1", "5", 1, 1);
 	// graph_insert_edge(graph, "5", "6", 1, 1);
+
+
+	// // test 3
+	// graph_insert_node(graph, "s", 6, 3);
+	// graph_insert_node(graph, "1", 6, 3);
+	// graph_insert_node(graph, "2", 6, 3);
+	// graph_insert_node(graph, "3", 6, 3);
+	// graph_insert_node(graph, "4", 6, 3);
+	// graph_insert_node(graph, "t", 6, 3);
+
+	// graph_insert_edge(graph, "s", "1", 1, 16);
+	//graph_insert_edge(graph, "s", "3", 2, 13);
+	// graph_insert_edge(graph, "1", "3", 3, 10);
+	// graph_insert_edge(graph, "3", "1", 4, 4);
+	// graph_insert_edge(graph, "1", "2", 5, 12);
+	// graph_insert_edge(graph, "2", "3", 6, 9);
+	// graph_insert_edge(graph, "3", "4", 7, 14);
+	// graph_insert_edge(graph, "4", "2", 8, 7);
+	// graph_insert_edge(graph, "2", "t", 9, 20);
+	// graph_insert_edge(graph, "4", "t", 10, 4);
+
+	// // graph_remove_node(graph, "2");

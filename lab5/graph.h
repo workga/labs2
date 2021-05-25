@@ -24,7 +24,8 @@ enum Error {
 	INVALID_INPUT,
 	END_OF_FILE,
 	PATH_NOT_FOUND,
-	NEGATIVE_LOOP_FOUND
+	NEGATIVE_LOOP_FOUND,
+	COULD_NOT_READ_FILE
 };
 
 
@@ -126,12 +127,13 @@ void   graph_make_graphviz(Graph *graph);
 Graph* graph_load();
 int    graph_save(Graph *graph);
 
-int    graph_random(Graph *graph, int size);
+int    graph_random(Graph *graph, int size, int perc);
 int    calculate_len(int size);
-int    calculate_edges_count(int size);
-Node*  get_node_by_index(Graph *graph, int index);
+int    calculate_edges_count(int size, int perc);
 char*  random_str(int len);
-int    edge_weight_by_nodes(Node *u, Node *v);
+Node*  get_node_by_index(Graph *graph, int index);
 
+//--------/ Graph Tests /------------------------------------------------------
+int    graph_test(int size, int perc, int ntests, int niters);
 
 #endif
