@@ -97,12 +97,12 @@ Node*  graph_find(Graph *graph, char *key);
 
 
 //--------/ Graph Algos /------------------------------------------------------
-int    graph_dfs(Graph *graph, char *key_1, char *key_2); // Depth-First Search
+int    graph_dfs(Graph *graph, char *key_1, char *key_2, int silent); // Depth-First Search
 Node*  graph_dfs_visit(Node *u, Node *finish, int *colors, Node **prevs);
 
-int    graph_bf(Graph *graph, char *key_1, char *key_2); // The Bellman–Ford algorithm
+int    graph_bf(Graph *graph, char *key_1, char *key_2, int silent); // The Bellman–Ford algorithm
 
-int    graph_rn_max_flow(Graph *graph, char *key_1, char *key_2);
+int    graph_rn_max_flow(Graph *graph, char *key_1, char *key_2,  int silent);
 Graph* graph_rn(Graph *graph); // Residual network
 
 
@@ -135,5 +135,6 @@ Node*  get_node_by_index(Graph *graph, int index);
 
 //--------/ Graph Tests /------------------------------------------------------
 int    graph_test(int size, int perc, int ntests, int niters);
+int    graph_algorythms_test(int size, int perc, int ntests, int niters);
 
 #endif

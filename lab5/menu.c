@@ -198,7 +198,7 @@ int dialog_dfs(Graph *graph) {
 		return END_OF_FILE;
 	}
 
-	int e = graph_dfs(graph, key_1, key_2);
+	int e = graph_dfs(graph, key_1, key_2, 0);
 
 	free(key_1);
 	free(key_2);
@@ -218,7 +218,7 @@ int dialog_bf(Graph *graph) {
 		return END_OF_FILE;
 	}
 
-	int e = graph_bf(graph, key_1, key_2);
+	int e = graph_bf(graph, key_1, key_2, 0);
 
 	free(key_1);
 	free(key_2);
@@ -238,7 +238,7 @@ int dialog_rn(Graph *graph) {
 		return END_OF_FILE;
 	}
 
-	int e = graph_rn_max_flow(graph, key_1, key_2);
+	int e = graph_rn_max_flow(graph, key_1, key_2, 0);
 
 	free(key_1);
 	free(key_2);
@@ -295,6 +295,30 @@ int dialog_test(Graph *graph) {
 	if ((perc < 0) || (perc > 100)) return INVALID_INPUT;
 
 	int e = graph_test(size, perc, ntests, niters);
+	return e;
+}
+
+
+int dialog_algorythms_test(Graph *graph) {
+	printf("Enter number of tests (graphs): \n");
+	int ntests;
+	if(get_int(&ntests)) return OUT_OF_MEMORY;
+
+	printf("Enter number of iterations (for each graph): \n");
+	int niters;
+	if(get_int(&niters)) return OUT_OF_MEMORY;
+
+	printf("Enter number of nodes: \n");
+	int size;
+	if(get_int(&size)) return OUT_OF_MEMORY;
+
+	printf("Enter the fill percentage (percent of edges, 0 - 100): \n");
+	int perc;
+	if(get_int(&perc)) return OUT_OF_MEMORY;
+
+	if ((perc < 0) || (perc > 100)) return INVALID_INPUT;
+
+	int e = graph_algorythms_test(size, perc, ntests, niters);
 	return e;
 }
 
@@ -400,9 +424,10 @@ void start(Graph *graph) {
 					      "7. Residual network\n",
 					      "8. Show",
 					  	  "9. Random",
-					  	  "10. Test\n",
-					  	  "11. Load map",
-					  	  "12. Find path by coordinates"};
+					  	  "10. Graph test",
+					  	  "11. Algorythms test\n",
+					  	  "12. Load map",
+					  	  "13. Find path by coordinates"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
 	int (*dialog_functions[])(Graph*) = {NULL,
@@ -416,6 +441,7 @@ void start(Graph *graph) {
 										dialog_show,
 										dialog_random,
 										dialog_test,
+										dialog_algorythms_test,
 										dialog_load_map, 
 										dialog_find_path};
 

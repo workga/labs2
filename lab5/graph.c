@@ -285,7 +285,7 @@ Node* graph_find(Graph *graph, char *key) {
 
 
 //--------/ Graph Algos /------------------------------------------------------
-int graph_dfs(Graph *graph, char *key_1, char *key_2) {
+int graph_dfs(Graph *graph, char *key_1, char *key_2, int silent) {
 
 	Node *start = graph_find(graph, key_1);
 	if (!start) return KEY_NOT_FOUND;
@@ -302,7 +302,7 @@ int graph_dfs(Graph *graph, char *key_1, char *key_2) {
 
 
 	finish = graph_dfs_visit(start, finish, colors, prevs);
-	graph_print_path(graph, finish, prevs);
+	if (!silent) graph_print_path(graph, finish, prevs);
 
 	free(colors);
 	free(prevs);
@@ -337,7 +337,7 @@ Node* graph_dfs_visit(Node* u, Node *finish, int *colors, Node **prevs) {
 
 
 
-int graph_bf(Graph *graph, char *key_1, char *key_2) {
+int graph_bf(Graph *graph, char *key_1, char *key_2, int silent) {
 
 	Node *start = graph_find(graph, key_1);
 	if (!start) return KEY_NOT_FOUND;
@@ -412,7 +412,7 @@ int graph_bf(Graph *graph, char *key_1, char *key_2) {
 		return PATH_NOT_FOUND;
 	}
 	else {
-		graph_print_path(graph, finish, prevs);
+		if (!silent) graph_print_path(graph, finish, prevs);
 		free(dists);
 		free(prevs);
 		return OK;
@@ -420,7 +420,7 @@ int graph_bf(Graph *graph, char *key_1, char *key_2) {
 }
 
 
-int graph_rn_max_flow(Graph *graph, char *key_1, char *key_2) {
+int graph_rn_max_flow(Graph *graph, char *key_1, char *key_2,  int silent) {
 	// set flow to zero
 	Node *cur = graph->list;
 	while (cur) {
@@ -470,9 +470,12 @@ int graph_rn_max_flow(Graph *graph, char *key_1, char *key_2) {
 
 			cur = prevs_f[cur->i];
 		}
+
 		if (DEBUG) {
-			printf("[PATH] cf_min: %d\n", cf_min);
-			graph_print_path(graph_f, finish, prevs_f);
+			if (!silent) {
+				printf("[PATH] cf_min: %d\n", cf_min);
+				graph_print_path(graph_f, finish, prevs_f);
+			}
 		}
 
 		// increase f along the path
@@ -503,9 +506,10 @@ int graph_rn_max_flow(Graph *graph, char *key_1, char *key_2) {
 		finish = graph_find(graph_f, key_2);
 	}
 	// here we have max flow and corresponding Gf
-	graph_make_graphviz(graph_f);
-	graph_make_graphviz(graph);
-
+	if (!silent) {
+		graph_make_graphviz(graph_f);
+		graph_make_graphviz(graph);
+	}
 
 	free(colors_f);
 	free(prevs_f);
@@ -1081,3 +1085,85 @@ int graph_test(int size, int perc, int ntests, int niters) {
 }
 
 
+int graph_algorythms_test(int size, int perc, int ntests, int niters) {
+    srand(time(NULL));
+	int e;
+	
+	double g_t_dfs = 0;
+    double g_t_bf = 0;
+    double g_t_rn = 0;
+
+    for (int i = 0; i < ntests; i++) {
+	    double t_dfs = 0;
+	    double t_bf = 0;
+	    double t_rn = 0;
+	    double t_edge_remove = 0;
+
+		Graph *graph = graph_new();
+		graph_random(graph, size, perc);
+
+		for (int j = 0; j < niters; j++) {
+			clock_t ts;
+			clock_t tf;
+
+			// two random nodes
+			int ui = rand() % size;
+			int vi;
+			do {
+				vi = rand() % size;
+			} while (vi == ui);
+			char *key_1 = get_node_by_index(graph, ui)->key;
+			char *key_2 = get_node_by_index(graph, vi)->key;
+
+			// dfs
+			ts = clock();
+			e = graph_dfs(graph, key_1, key_2, 1);
+			tf = clock();
+
+			t_dfs += (double)(tf - ts)/CLOCKS_PER_SEC;
+
+			//bf
+			ts = clock();
+			e = graph_bf(graph, key_1, key_2, 1);
+			tf = clock();
+
+			t_bf += (double)(tf - ts)/CLOCKS_PER_SEC;
+
+			// rn
+			ts = clock();
+			e = graph_rn_max_flow(graph, key_1, key_2, 1);
+			tf = clock();
+
+			t_rn += (double)(tf - ts)/CLOCKS_PER_SEC;
+			//printf("Test: %d\tIter: %d\n", i + 1, j + 1);
+		}
+
+		graph_delete(graph);
+
+		t_dfs /= niters;
+	    t_bf /= niters;
+	    t_rn /= niters;
+
+	    g_t_dfs += t_dfs;
+    	g_t_bf += t_bf;
+    	g_t_rn += t_rn;
+    }
+
+    g_t_dfs /= ntests;
+    g_t_bf /= ntests;
+    g_t_rn /= ntests;
+
+
+    // printf("%d\t%d\t%.10f\t%.10f\t%.10f\n", perc, size,
+    //    	   g_t_dfs,
+    // 	   g_t_bf,
+    // 	   g_t_rn
+    // 	   );
+    printf("[ALGORYMS TEST] Graph size:\t%d\nFill percentage:\t%d\n\n", size, perc);
+
+    printf("Type:\tDFS\nAverage time:\t%.10f\n\n", g_t_dfs);
+	printf("Type:\tBF\nAverage time:\t%.10f\n\n", g_t_bf);
+	printf("Type:\tRN\nAverage time:\t%.10f\n\n", g_t_rn);
+
+    return OK;
+}

@@ -17,7 +17,7 @@ int find_path(Graph *graph, double x1, double y1, double x2, double y2) {
 	printf("Nearest node for (x1, y1): %s\n", node_1->key);
 	printf("Nearest node for (x2, y2): %s\n", node_2->key);
 
-	int e = graph_bf(graph, node_1->key, node_2->key);
+	int e = graph_bf(graph, node_1->key, node_2->key, 1);
 	return e;
 }
 
