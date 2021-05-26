@@ -652,7 +652,8 @@ void graph_print_path(Graph *graph, Node *node, Node **prevs) {
 	}
 
 	for (int i = 0; i < count - 1; i++) {
-		printf("\"%s\" --(w:%d, c:%d)--> ", path[i]->key, ws[i+1], cs[i+1]);
+		printf("\"%s\", x: %lf, y: %lf --(w:%d, c:%d)--> ",
+			   path[i]->key, path[i]->x, path[i]->y, ws[i+1], cs[i+1]);
 	}
 	printf("\"%s\"\n", path[count - 1]->key);
 
@@ -698,14 +699,14 @@ void graph_make_graphviz(Graph *graph) {
 	Node *cur_node = graph->list;
 	while (cur_node) {
 		Edge *cur_edge = cur_node->list;
-		fprintf(fp, "\"%s\";\n", cur_node->key);
-		printf("\"%s\";\n", cur_node->key);
+		fprintf(fp, "\"%s, x: %lf, y: %lf\";\n", cur_node->key, cur_node->x, cur_node->y);
+		printf("\"%s, x: %lf, y: %lf\";\n", cur_node->key, cur_node->x, cur_node->y);
 
 		while (cur_edge) {
-			fprintf(fp, "\"%s\" -> \"%s\" [label = \"%d, %d/%d\"];\n",
-				    cur_node->key, cur_edge->near->key, cur_edge->w, cur_edge->f, cur_edge->c);
-			printf("\"%s\" -> \"%s\" [label = \"%d, %d/%d\"];\n",
-				   cur_node->key, cur_edge->near->key, cur_edge->w, cur_edge->f, cur_edge->c);
+			fprintf(fp, "\"%s, x: %lf, y: %lf\" -> \"%s\" [label = \"%d, %d/%d\"];\n",
+				    cur_node->key, cur_node->x, cur_node->y, cur_edge->near->key, cur_edge->w, cur_edge->f, cur_edge->c);
+			printf("\"%s, x: %lf, y: %lf\" -> \"%s\" [label = \"%d, %d/%d\"];\n",
+				   cur_node->key, cur_node->x, cur_node->y, cur_edge->near->key, cur_edge->w, cur_edge->f, cur_edge->c);
 
 			cur_edge = cur_edge->next;
 		}

@@ -305,6 +305,29 @@ int dialog_load_map(Graph *graph) {
 }
 
 
+int dialog_find_path(Graph *graph) {
+	printf("Enter x1:\n");
+	int x1;
+	if(get_int(&x1)) return OUT_OF_MEMORY;
+
+	printf("Enter y1:\n");
+	int y1;
+	if(get_int(&y1)) return OUT_OF_MEMORY;
+
+	printf("Enter x2:\n");
+	int x2;
+	if(get_int(&x2)) return OUT_OF_MEMORY;
+
+	printf("Enter y2:\n");
+	int y2;
+	if(get_int(&y2)) return OUT_OF_MEMORY;
+
+
+	int e = find_path(graph, x1, y1, x2, y2);
+	return e;
+}
+
+
 int dialog(const char *menu[], const int menu_size) {
 	char *error_msg = "";
 	int opt;
@@ -378,7 +401,8 @@ void start(Graph *graph) {
 					      "8. Show",
 					  	  "9. Random",
 					  	  "10. Test\n",
-					  	  "11. Load map"};
+					  	  "11. Load map",
+					  	  "12. Find path by coordinates"};
 	const int menu_size = sizeof(menu)/sizeof(menu[0]);
 
 	int (*dialog_functions[])(Graph*) = {NULL,
@@ -392,7 +416,8 @@ void start(Graph *graph) {
 										dialog_show,
 										dialog_random,
 										dialog_test,
-										dialog_load_map};
+										dialog_load_map, 
+										dialog_find_path};
 
 	int opt;
 	while((opt = dialog(menu, menu_size))) {
