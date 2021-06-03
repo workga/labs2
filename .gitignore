@@ -1,11 +1,11 @@
 *.o
 *.a
-main
-test
-logs.txt
-/notes.txt
+*.txt
 *.cbp
 *.layout
 *.depend
 *.swp
 */bin/
+*/obj/
+main
+test

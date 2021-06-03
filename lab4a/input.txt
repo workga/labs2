@@ -1,9 +1,0 @@
-g
-info g
-a
-info a
-h
-info h
-d
-info d
-j
